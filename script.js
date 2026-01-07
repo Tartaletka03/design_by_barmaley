@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Функция для открытия карточки в полноэкранном режиме
+    // Функция для открытия КАРТИНКИ (PNG, JPG, WEBP) в полноэкранном режиме
     function openImageModal(imageSrc) {
         const modalContent = document.querySelector('.modal-content');
         modalContent.innerHTML = '';
@@ -78,28 +78,41 @@ document.addEventListener('DOMContentLoaded', function() {
         img.style.objectFit = 'contain';
         img.style.borderRadius = '8px';
         
-        // Кнопка закрытия
+        // МАЛЕНЬКИЙ НЕПРИМЕТНЫЙ КРЕСТИК для закрытия
         const closeButton = document.createElement('div');
-        closeButton.innerHTML = '✕';
+        closeButton.innerHTML = '×';
         closeButton.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0,0,0,0.7);
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: rgba(0,0,0,0.5);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
+            font-weight: bold;
             cursor: pointer;
             z-index: 2001;
             user-select: none;
             touch-action: manipulation;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
         `;
+        
+        // При наведении делаем крестик чуть заметнее
+        closeButton.addEventListener('mouseenter', function() {
+            this.style.opacity = '1';
+            this.style.background = 'rgba(0,0,0,0.8)';
+        });
+        
+        closeButton.addEventListener('mouseleave', function() {
+            this.style.opacity = '0.7';
+            this.style.background = 'rgba(0,0,0,0.5)';
+        });
         
         // Функция для закрытия
         function closeModalHandler(e) {
@@ -118,43 +131,56 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
     }
 
+    // Функция для открытия ВИДЕО (WEBM, MP4) в полноэкранном режиме
     function openVideoModal(videoSrc) {
+        const modalContent = document.querySelector('.modal-content');
+        modalContent.innerHTML = '';
+        
         const video = document.createElement('video');
         video.src = videoSrc;
         video.autoplay = true;
         video.loop = true;
         video.muted = true;
-        video.style.width = '100vw';
-        video.style.height = '100vh';
-        video.style.maxWidth = '100vw';
-        video.style.maxHeight = '100vh';
+        video.controls = false; // Убираем стандартные контролы
+        video.style.width = '100%';
+        video.style.height = '100%';
         video.style.objectFit = 'contain';
         
-        const modalContent = document.querySelector('.modal-content');
-        modalContent.innerHTML = '';
-        
-        // Кнопка закрытия
+        // МАЛЕНЬКИЙ НЕПРИМЕТНЫЙ КРЕСТИК для закрытия
         const closeButton = document.createElement('div');
-        closeButton.innerHTML = '✕';
+        closeButton.innerHTML = '×';
         closeButton.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0,0,0,0.7);
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: rgba(0,0,0,0.5);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
+            font-weight: bold;
             cursor: pointer;
             z-index: 2001;
             user-select: none;
             touch-action: manipulation;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
         `;
+        
+        // При наведении делаем крестик чуть заметнее
+        closeButton.addEventListener('mouseenter', function() {
+            this.style.opacity = '1';
+            this.style.background = 'rgba(0,0,0,0.8)';
+        });
+        
+        closeButton.addEventListener('mouseleave', function() {
+            this.style.opacity = '0.7';
+            this.style.background = 'rgba(0,0,0,0.5)';
+        });
         
         // Функция для закрытия
         function closeModalHandler(e) {
@@ -173,39 +199,16 @@ document.addEventListener('DOMContentLoaded', function() {
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         
+        // Пытаемся запустить видео автоматически
         video.play().catch(e => {
             console.log('Автовоспроизведение заблокировано');
-            const playButton = document.createElement('button');
-            playButton.textContent = '▶️ Воспроизвести видео';
-            playButton.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                padding: 15px 30px;
-                background: var(--accent);
-                color: white;
-                border: none;
-                border-radius: 25px;
-                font-size: 1.2rem;
-                cursor: pointer;
-                z-index: 1000;
-                touch-action: manipulation;
-            `;
-            
-            function playVideoHandler(e) {
-                e.preventDefault();
-                video.play();
-                playButton.remove();
-                return false;
-            }
-            
-            playButton.addEventListener('click', playVideoHandler);
-            playButton.addEventListener('touchend', playVideoHandler);
-            modalContent.appendChild(playButton);
+            // Если автовоспроизведение заблокировано, добавляем КРЕСТИК, а не кнопку воспроизведения
+            // Видео все равно покажется, но не будет автоматически играть
+            // Пользователь может тапнуть по видео для воспроизведения
         });
     }
 
+    
     // Функция для закрытия модального окна
     function closeImageModal() {
         const video = document.querySelector('.modal-content video');

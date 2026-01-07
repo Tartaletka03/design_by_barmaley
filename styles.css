@@ -1094,3 +1094,20 @@ body.light-theme .header-contacts:hover .contact-text {
         padding: 10px;
     }
 }
+
+/* Стили для крестика закрытия на мобильных */
+@media (max-width: 768px) {
+    .modal-content div[style*="position: fixed"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 18px !important;
+        opacity: 0.6 !important;
+    }
+    
+    .modal-content div[style*="position: fixed"]:active {
+        opacity: 1 !important;
+        background: rgba(0,0,0,0.8) !important;
+    }
+}
