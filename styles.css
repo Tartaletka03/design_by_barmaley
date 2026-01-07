@@ -1078,22 +1078,7 @@ body.light-theme .header-contacts:hover .contact-text {
         width: auto;
         height: auto;
     }
-    
-    /* Добавляем подсказку для закрытия */
-    .modal::before {
-        content: 'Нажмите на темную область для закрытия';
-        position: absolute;
-        top: 20px;
-        left: 0;
-        right: 0;
-        text-align: center;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 14px;
-        z-index: 2001;
-        pointer-events: none;
-        padding: 10px;
-    }
-}
+
 
 /* Стили для крестика закрытия на мобильных */
 @media (max-width: 768px) {
