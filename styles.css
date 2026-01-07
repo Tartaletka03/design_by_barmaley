@@ -1035,6 +1035,66 @@ body.light-theme .header-contacts:hover .contact-text {
     display: none !important;
 }
 
+
+/* Исправление для мобильных устройств */
+@media (max-width: 768px) {
+    .card {
+        /* Увеличиваем область клика */
+        position: relative;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    /* Делаем всю карточку кликабельной */
+    .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 5;
+    }
+    
+    /* Улучшаем модальное окно для мобильных */
+    .modal {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .modal-content {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+    
+    .modal-content img,
+    .modal-content video {
+        max-width: 100vw;
+        max-height: 100vh;
+        width: auto;
+        height: auto;
+    }
+    
+    /* Добавляем подсказку для закрытия */
+    .modal::before {
+        content: 'Нажмите на темную область для закрытия';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        z-index: 2001;
+        pointer-events: none;
+        padding: 10px;
+    }
+}
+
 /* Стили для крестика закрытия на мобильных */
 @media (max-width: 768px) {
     .modal-content div[style*="position: fixed"] {
@@ -1049,5 +1109,35 @@ body.light-theme .header-contacts:hover .contact-text {
     .modal-content div[style*="position: fixed"]:active {
         opacity: 1 !important;
         background: rgba(0,0,0,0.8) !important;
+    }
+}
+
+/* Улучшения для мобильных устройств */
+@media (max-width: 768px) {
+    /* Крестик закрытия на мобильных */
+    .modal-content div[style*="position: fixed"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 18px !important;
+        opacity: 0.6 !important;
+        background: rgba(0,0,0,0.6) !important;
+    }
+    
+    .modal-content div[style*="position: fixed"]:active {
+        opacity: 1 !important;
+        background: rgba(0,0,0,0.9) !important;
+    }
+    
+    /* Убираем hover эффекты на мобильных */
+    .card:hover {
+        transform: none !important;
+    }
+    
+    /* Делаем карточки более отзывчивыми */
+    .card:active {
+        transform: scale(0.98) !important;
+        transition: transform 0.1s !important;
     }
 }
