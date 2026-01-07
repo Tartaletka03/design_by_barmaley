@@ -78,7 +78,42 @@ document.addEventListener('DOMContentLoaded', function() {
         img.style.objectFit = 'contain';
         img.style.borderRadius = '8px';
         
+        // Кнопка закрытия
+        const closeButton = document.createElement('div');
+        closeButton.innerHTML = '✕';
+        closeButton.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 2001;
+            user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        
+        // Функция для закрытия
+        function closeModalHandler(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeImageModal();
+            return false;
+        }
+        
+        closeButton.addEventListener('click', closeModalHandler);
+        closeButton.addEventListener('touchend', closeModalHandler);
+        
         modalContent.appendChild(img);
+        modalContent.appendChild(closeButton);
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
@@ -97,7 +132,43 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const modalContent = document.querySelector('.modal-content');
         modalContent.innerHTML = '';
+        
+        // Кнопка закрытия
+        const closeButton = document.createElement('div');
+        closeButton.innerHTML = '✕';
+        closeButton.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 2001;
+            user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        
+        // Функция для закрытия
+        function closeModalHandler(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeImageModal();
+            return false;
+        }
+        
+        closeButton.addEventListener('click', closeModalHandler);
+        closeButton.addEventListener('touchend', closeModalHandler);
+        
         modalContent.appendChild(video);
+        modalContent.appendChild(closeButton);
         
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -119,11 +190,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 font-size: 1.2rem;
                 cursor: pointer;
                 z-index: 1000;
+                touch-action: manipulation;
             `;
-            playButton.onclick = () => {
+            
+            function playVideoHandler(e) {
+                e.preventDefault();
                 video.play();
                 playButton.remove();
-            };
+                return false;
+            }
+            
+            playButton.addEventListener('click', playVideoHandler);
+            playButton.addEventListener('touchend', playVideoHandler);
             modalContent.appendChild(playButton);
         });
     }
@@ -270,17 +348,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     video.currentTime = 0;
                 });
                 
-                // Функция для открытия изображения
-                function openImageHandler(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    openImageModal(card.path);
+                // Функция обработки открытия видео
+                function handleVideoClick(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openVideoModal(card.path);
                     return false;
                 }
-
-                // Добавляем оба типа событий
-                cardElement.addEventListener('click', openImageHandler);
-                cardElement.addEventListener('touchend', openImageHandler);
+                
+                cardElement.addEventListener('click', handleVideoClick);
+                cardElement.addEventListener('touchend', handleVideoClick);
                 
                 cardElement.appendChild(video);
             } else {
@@ -304,17 +381,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     cardElement.appendChild(errorDiv);
                 };
                 
-                // Функция для открытия видео
-                function openVideoHandler(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    openVideoModal(card.path);
+                // Функция обработки открытия изображения
+                function handleImageClick(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openImageModal(card.path);
                     return false;
                 }
-
-                // Добавляем оба типа событий
-                cardElement.addEventListener('click', openVideoHandler);
-                cardElement.addEventListener('touchend', openVideoHandler);
+                
+                cardElement.addEventListener('click', handleImageClick);
+                cardElement.addEventListener('touchend', handleImageClick);
                 
                 cardElement.appendChild(img);
             }
@@ -338,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Закрытие по touch на затемненную область (для мобильных)
+    // Закрытие по touch на мобильных
     imageModal.addEventListener('touchend', function(e) {
         if (e.target === imageModal) {
             e.preventDefault();
@@ -348,19 +424,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Предотвращаем скроллинг при открытом модальном окне на мобильных
-    document.addEventListener('touchmove', function(e) {
-        if (imageModal.classList.contains('show')) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-
     // Закрытие по нажатию Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && imageModal.classList.contains('show')) {
             closeImageModal();
         }
     });
+    
+    // Предотвращаем скроллинг страницы при открытом модальном окне
+    document.addEventListener('touchmove', function(e) {
+        if (imageModal.classList.contains('show')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
     
     // Показать избранные карты
     function showFeaturedCards() {
@@ -588,4 +664,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }, index * 50);
         });
     }, 100);
+    
+    // Дополнительный фикс для мобильных (на всякий случай)
+    setTimeout(function() {
+        // Убедимся, что все карточки имеют touch события
+        document.querySelectorAll('.card').forEach(card => {
+            if (!card.hasTouchListener) {
+                card.addEventListener('touchend', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const video = card.querySelector('video');
+                    const img = card.querySelector('img');
+                    
+                    if (video) {
+                        openVideoModal(video.src);
+                    } else if (img) {
+                        openImageModal(img.src);
+                    }
+                    return false;
+                });
+                card.hasTouchListener = true;
+            }
+        });
+    }, 1000);
 });
