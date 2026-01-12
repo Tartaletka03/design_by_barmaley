@@ -109,6 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
         modalContent.appendChild(closeButton);
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        // Предотвращаем скролл на фоне для мобильных
+        document.addEventListener('touchmove', preventScroll, { passive: false });
     }
 
     // Функция для открытия ВИДЕО в полноэкранном режиме
@@ -148,12 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         
+        // Предотвращаем скролл на фоне для мобильных
+        document.addEventListener('touchmove', preventScroll, { passive: false });
+        
         // Пытаемся запустить видео
         video.play().catch(e => {
             console.log('Автовоспроизведение заблокировано');
         });
     }
-    
+
     // Функция для закрытия модального окна
     function closeImageModal() {
         const video = document.querySelector('.modal-content video');
@@ -164,6 +170,134 @@ document.addEventListener('DOMContentLoaded', function() {
         
         imageModal.classList.remove('show');
         document.body.style.overflow = '';
+        
+        // Восстанавливаем скролл
+        document.removeEventListener('touchmove', preventScroll);
+    }
+
+    // Функция предотвращения скролла для модального окна
+    function preventScroll(e) {
+        if (imageModal.classList.contains('show')) {
+            e.preventDefault();
+            return false;
+        }
+    }
+
+    // Обновленная функция для обработки нажатий на карточки
+    function setupCardInteractions() {
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            // Удаляем старые обработчики
+            card.removeEventListener('click', handleCardClick);
+            card.removeEventListener('touchend', handleCardTouch);
+            
+            // Добавляем новые обработчики
+            card.addEventListener('click', handleCardClick);
+            card.addEventListener('touchend', handleCardTouch);
+        });
+    }
+
+    // Обработчик клика для десктопа
+    function handleCardClick(e) {
+        // Проверяем, было ли это двойное нажатие
+        const currentTime = new Date().getTime();
+        const timeSinceLastClick = currentTime - (this.lastClickTime || 0);
+        
+        if (timeSinceLastClick < 300) {
+            // Двойной клик - открываем модальное окно
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const video = this.querySelector('video');
+            const img = this.querySelector('img');
+            
+            if (video) {
+                openVideoModal(video.src);
+            } else if (img) {
+                openImageModal(img.src);
+            }
+            
+            this.lastClickTime = 0;
+        } else {
+            // Одиночный клик - запоминаем время
+            this.lastClickTime = currentTime;
+        }
+    }
+
+    // Обработчик касания для мобильных
+    function handleCardTouch(e) {
+        // Предотвращаем срабатывание при скролле
+        if (this.isScrolling) {
+            return;
+        }
+        
+        // Проверяем, было ли это двойное касание
+        const currentTime = new Date().getTime();
+        const timeSinceLastTap = currentTime - (this.lastTapTime || 0);
+        
+        if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+            // Двойное касание - открываем модальное окно
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const video = this.querySelector('video');
+            const img = this.querySelector('img');
+            
+            if (video) {
+                openVideoModal(video.src);
+            } else if (img) {
+                openImageModal(img.src);
+            }
+            
+            this.lastTapTime = 0;
+            this.tapCount = 0;
+        } else {
+            // Одиночное касание - запоминаем время
+            this.lastTapTime = currentTime;
+            this.tapCount = (this.tapCount || 0) + 1;
+            
+            // Сбрасываем счетчик через 500 мс
+            setTimeout(() => {
+                this.tapCount = 0;
+            }, 500);
+        }
+    }
+
+    // Функция для предотвращения случайных срабатываний при скролле
+    function preventScrollTrigger() {
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let isScrolling = false;
+            
+            card.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                isScrolling = false;
+            });
+            
+            card.addEventListener('touchmove', function(e) {
+                const touchY = e.touches[0].clientY;
+                const touchX = e.touches[0].clientX;
+                const deltaY = Math.abs(touchY - touchStartY);
+                const deltaX = Math.abs(touchX - touchStartX);
+                
+                // Если перемещение больше 10px, считаем это скроллом
+                if (deltaY > 10 || deltaX > 10) {
+                    isScrolling = true;
+                }
+            });
+            
+            card.addEventListener('touchend', function(e) {
+                // Задержка для предотвращения срабатывания при быстром скролле
+                setTimeout(() => {
+                    this.isScrolling = isScrolling;
+                }, 100);
+            });
+        });
     }
     
     // Загрузка карточек из ручного списка
@@ -304,45 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     video.currentTime = 0;
                 });
                 
-                // Двойной клик для десктопа
-                let lastClickTime = 0;
-                cardElement.addEventListener('click', function(e) {
-                    const currentTime = new Date().getTime();
-                    const timeSinceLastClick = currentTime - lastClickTime;
-                    
-                    if (timeSinceLastClick < 300) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openVideoModal(card.path);
-                    }
-                    lastClickTime = currentTime;
-                });
-                
-                // Двойной тап для мобильных
-                let lastTapTime = 0;
-                let tapCount = 0;
-                cardElement.addEventListener('touchend', function(e) {
-                    const currentTime = new Date().getTime();
-                    const timeSinceLastTap = currentTime - lastTapTime;
-                    
-                    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-                        tapCount++;
-                        if (tapCount === 2) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openVideoModal(card.path);
-                            tapCount = 0;
-                        }
-                    } else {
-                        tapCount = 1;
-                    }
-                    lastTapTime = currentTime;
-                    
-                    setTimeout(() => {
-                        tapCount = 0;
-                    }, 500);
-                });
-                
                 cardElement.appendChild(video);
             } else {
                 const img = document.createElement('img');
@@ -364,53 +459,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     cardElement.appendChild(errorDiv);
                 };
                 
-                // Двойной клик для десктопа
-                let lastClickTime = 0;
-                cardElement.addEventListener('click', function(e) {
-                    const currentTime = new Date().getTime();
-                    const timeSinceLastClick = currentTime - lastClickTime;
-                    
-                    if (timeSinceLastClick < 300) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openImageModal(card.path);
-                    }
-                    lastClickTime = currentTime;
-                });
-                
-                // Двойной тап для мобильных
-                let lastTapTime = 0;
-                let tapCount = 0;
-                cardElement.addEventListener('touchend', function(e) {
-                    const currentTime = new Date().getTime();
-                    const timeSinceLastTap = currentTime - lastTapTime;
-                    
-                    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-                        tapCount++;
-                        if (tapCount === 2) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openImageModal(card.path);
-                            tapCount = 0;
-                        }
-                    } else {
-                        tapCount = 1;
-                    }
-                    lastTapTime = currentTime;
-                    
-                    setTimeout(() => {
-                        tapCount = 0;
-                    }, 500);
-                });
-                
                 cardElement.appendChild(img);
             }
             
             cardsContainer.appendChild(cardElement);
         });
         
-        // Анимация появления карточек
+        // Настраиваем взаимодействие с карточками
         setTimeout(() => {
+            setupCardInteractions();
+            preventScrollTrigger();
+            
+            // Анимация появления карточек
             const cardElements = cardsContainer.querySelectorAll('.card');
             cardElements.forEach((card, index) => {
                 setTimeout(() => {
@@ -710,27 +770,4 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFilters();
     loadTheme();
     loadCardsFromManualList();
-
-    // Фикс для мобильных
-    setTimeout(function() {
-        document.querySelectorAll('.card').forEach(card => {
-            if (!card.hasTouchListener) {
-                card.addEventListener('touchend', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    
-                    const video = card.querySelector('video');
-                    const img = card.querySelector('img');
-                    
-                    if (video) {
-                        openVideoModal(video.src);
-                    } else if (img) {
-                        openImageModal(img.src);
-                    }
-                    return false;
-                });
-                card.hasTouchListener = true;
-            }
-        });
-    }, 1000);
 });

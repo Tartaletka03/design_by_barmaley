@@ -955,13 +955,14 @@ body.light-theme .mobile-contact-link:hover {
         display: none;
     }
     
+    /* УВЕЛИЧИВАЕМ КАРТОЧКИ ДЛЯ ПЛАНШЕТОВ */
     .cards-container {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* было 160px */
         gap: 20px;
     }
     
     .card {
-        height: 240px;
+        height: 280px; /* было 240px */
     }
     
     .header h1 {
@@ -1015,13 +1016,14 @@ body.light-theme .mobile-contact-link:hover {
         padding: 10px;
     }
     
+    /* УВЕЛИЧИВАЕМ КАРТОЧКИ ДЛЯ МОБИЛЬНЫХ */
     .cards-container {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* было 140px */
         gap: 15px;
     }
     
     .card {
-        height: 200px;
+        height: 240px; /* было 200px */
     }
     
     .header {
@@ -1052,6 +1054,19 @@ body.light-theme .mobile-contact-link:hover {
         font-size: 0.8rem;
         padding: 20px 0;
         margin-top: 40px;
+    }
+}
+
+/* ДОБАВЛЯЕМ ДОПОЛНИТЕЛЬНЫЙ БРЕЙКПОИНТ ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ */
+@media (max-width: 360px) {
+    /* ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ТЕЛЕФОНОВ */
+    .cards-container {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .card {
+        height: 220px; /* Минимальная высота даже для самых маленьких экранов */
     }
 }
 
@@ -1406,4 +1421,30 @@ body.light-theme .mobile-menu-toggle {
 body.light-theme .mobile-menu-toggle:hover {
     background: var(--accent-hover);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
+
+/* Улучшение для мобильных касаний */
+.card {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Предотвращение выделения при долгом нажатии */
+.card img,
+.card video {
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Улучшение для модального окна на мобильных */
+.modal.show {
+    touch-action: none;
+}
+
+.modal-content img,
+.modal-content video {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: auto;
 }
