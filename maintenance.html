@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квантовая неопределённость | by B@rmaley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://tartaletka03.github.io/design_by_barmaley/ico.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Дополнительные стили для страницы техработ */
+        .maintenance-body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .maintenance-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .quantum-header {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(145deg, rgba(26, 26, 36, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quantum-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        
+        .quantum-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .quantum-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Коробка Шредингера */
+        .schrodinger-box {
+            width: 140px;
+            height: 140px;
+            margin: 30px auto;
+            position: relative;
+            border: 3px solid var(--accent);
+            border-radius: 10px;
+            background: rgba(26, 26, 36, 0.6);
+            overflow: hidden;
+            box-shadow: 0 0 30px var(--glow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .schrodinger-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px var(--glow);
+        }
+        
+        .cat {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            top: 30px;
+            left: 30px;
+            animation: catSuperposition 4s ease-in-out infinite;
+            opacity: 0.8;
+        }
+        
+        .cat::before {
+            content: '=^._.^=';
+            position: absolute;
+            top: 30px;
+            left: 15px;
+            font-size: 24px;
+            color: white;
+        }
+        
+        @keyframes catSuperposition {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(0.1);
+                opacity: 0.2;
+            }
+        }
+        
+        /* Квантовый индикатор */
+        .quantum-indicator {
+            background: rgba(26, 26, 36, 0.6);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            position: relative;
+        }
+        
+        .quantum-state {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+        
+        .state-label {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        .state-arrow {
+            color: var(--accent);
+            font-size: 1.5rem;
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes arrowPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* Прогресс бар в стиле основного сайта */
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(26, 26, 36, 0.8);
+            border-radius: 15px;
+            margin: 30px 0;
+            overflow: hidden;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #9d3ef5, #6a1bb8);
+            border-radius: 15px;
+            width: 50%;
+            position: relative;
+            animation: quantumProgress 4s ease-in-out infinite;
+        }
+        
+        @keyframes quantumProgress {
+            0%, 100% { width: 45%; left: 0%; }
+            25% { width: 55%; left: 10%; }
+            50% { width: 40%; left: 60%; }
+            75% { width: 60%; left: 30%; }
+        }
+        
+        .progress-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Текст сообщения */
+        .quantum-message {
+            background: rgba(26, 26, 36, 0.4);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .quantum-message p {
+            color: var(--text);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .quantum-message .highlight {
+            color: var(--accent);
+            font-weight: 600;
+            padding: 10px 15px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            margin: 20px 0;
+        }
+        
+        /* Контакты */
+        .maintenance-contacts {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .maintenance-link {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--accent), #6a1bb8);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .maintenance-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--glow);
+            background: linear-gradient(135deg, #9d3ef5, #7a2cc9);
+        }
+        
+        /* Статистика */
+        .quantum-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .stat-box {
+            background: rgba(26, 26, 36, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Светлая тема */
+        body.light-theme .maintenance-body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+        }
+        
+        body.light-theme .quantum-header,
+        body.light-theme .quantum-indicator,
+        body.light-theme .quantum-message,
+        body.light-theme .stat-box {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+        
+        body.light-theme .quantum-title {
+            background: linear-gradient(90deg, #1e293b, var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        
+        body.light-theme .schrodinger-box {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--accent);
+        }
+        
+        body.light-theme .progress-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+        
+        body.light-theme .progress-fill {
+            background: linear-gradient(90deg, var(--accent), #1d4ed8, #2563eb);
+        }
+        
+        @media (max-width: 768px) {
+            .quantum-title {
+                font-size: 2.2rem;
+            }
+            
+            .maintenance-contacts {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .maintenance-link {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .quantum-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Квантовые частицы на фоне */
+        .quantum-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="maintenance-body">
+    <div class="maintenance-container">
+        <header class="quantum-header">
+            <h1 class="quantum-title">Квантовая неопределённость</h1>
+            <p class="quantum-subtitle">или почему сайт одновременно и работает, и не работает</p>
+            
+            <div class="schrodinger-box" id="schrodingerBox">
+                <div class="cat"></div>
+            </div>
+        </header>
+
+        <div class="quantum-indicator">
+            <div class="quantum-state">
+                <span class="state-label">Сайт работает</span>
+                <span class="state-arrow">↔</span>
+                <span class="state-label">Сайт не работает</span>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-fill"></div>
+                <div class="progress-label" id="progressLabel">Вероятность работы: 50% ± 50%</div>
+            </div>
+        </div>
+
+        <div class="quantum-message">
+            <p><strong>Наблюдательский парадокс:</strong> пока вы не открыли эту страницу, сайт находился в суперпозиции — он одновременно и работал, и не работал.</p>
+            
+            <p>Но вы посмотрели, и волновая функция коллапсировала в состояние "на техработках".</p>
+        </div>
+
+        <div class="quantum-stats">
+            <div class="stat-box">
+                <div class="stat-label">Наблюдений за коробкой</div>
+                <div class="stat-value" id="observations">1,337</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Состояние кота</div>
+                <div class="stat-value" id="catState">Суперпозиция</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Квантовых багов</div>
+                <div class="stat-value" id="quantumBugs">∞/2</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Коллапс через</div>
+                <div class="stat-value" id="collapseTime">Неизвестно</div>
+            </div>
+        </div>
+
+        <div class="maintenance-contacts">
+            <a href="https://t.me/NoT_TFound" target="_blank" class="maintenance-link">
+                <i class="fab fa-telegram"></i>
+                Наблюдать за котом
+            </a>
+            <a href="https://discordapp.com/users/860621809505402890" target="_blank" class="maintenance-link">
+                <i class="fab fa-discord"></i>
+                Исследовать коробку
+            </a>
+        </div>
+        
+        <footer class="footer">
+            <p>© 2026 Коллекция карточек by B@rmaley | Квантовая версия техработ</p>
+        </footer>
+    </div>
+
+    <script>
+        // Создаем квантовые частицы на фоне
+        function createParticles() {
+            const colors = ['#8a2be2', '#9d3ef5', '#6a1bb8', '#4a148c'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                
+                // Случайная позиция
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Случайный цвет
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Анимация
+                particle.style.animation = `
+                    floatParticle ${Math.random() * 10 + 10}s linear infinite,
+                    pulseParticle ${Math.random() * 3 + 2}s ease-in-out infinite
+                `;
+                particle.style.animationDelay = `-${Math.random() * 10}s`;
+                
+                // Динамически добавляем стили анимации
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes floatParticle {
+                        0% { transform: translate(0, 0) rotate(0deg); }
+                        25% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(90deg); }
+                        50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(180deg); }
+                        75% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(270deg); }
+                        100% { transform: translate(0, 0) rotate(360deg); }
+                    }
+                    
+                    @keyframes pulseParticle {
+                        0%, 100% { opacity: 0.1; transform: scale(1); }
+                        50% { opacity: 0.4; transform: scale(1.5); }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                document.body.appendChild(particle);
+            }
+        }
+        
+        // Обновление статистики
+        let observations = 1337;
+        const catStates = ["Суперпозиция", "Спит", "Играет", "Чинит код", "В запутанности"];
+        let collapseMinutes = Math.floor(Math.random() * 120) + 30;
+        
+        function updateStatistics() {
+            // Наблюдения
+            observations += Math.floor(Math.random() * 3) + 1;
+            document.getElementById('observations').textContent = 
+                observations.toLocaleString();
+            
+            // Состояние кота
+            const randomState = catStates[Math.floor(Math.random() * catStates.length)];
+            document.getElementById('catState').textContent = randomState;
+            
+            // Квантовые баги
+            const bugs = Math.floor(Math.random() * 100);
+            const isInfinity = Math.random() > 0.7;
+            document.getElementById('quantumBugs').textContent = 
+                isInfinity ? `∞/${bugs}` : `${bugs}/∞`;
+            
+            // Время коллапса
+            const now = new Date();
+            const collapseDate = new Date(now.getTime() + collapseMinutes * 60000);
+            const hours = collapseDate.getHours().toString().padStart(2, '0');
+            const minutes = collapseDate.getMinutes().toString().padStart(2, '0');
+            
+            if (Math.random() > 0.8) {
+                document.getElementById('collapseTime').textContent = "Неопределённо";
+            } else {
+                document.getElementById('collapseTime').textContent = `${hours}:${minutes}`;
+            }
+            
+            // Обновляем прогресс бар
+            updateProgressBar();
+        }
+        
+        function updateProgressBar() {
+            const progress = Math.floor(Math.random() * 30) + 35; // 35-65%
+            const uncertainty = 50 - Math.abs(50 - progress);
+            const fill = document.querySelector('.progress-fill');
+            const label = document.getElementById('progressLabel');
+            
+            // Плавное изменение ширины
+            fill.style.transition = 'width 1s ease';
+            fill.style.width = `${progress}%`;
+            
+            // Обновляем текст
+            label.textContent = `Вероятность работы: ${progress}% ± ${uncertainty}%`;
+            
+            // Случайно меняем градиент
+            const hue = Math.floor(Math.random() * 60) + 270; // Фиолетовые оттенки
+            fill.style.background = `linear-gradient(90deg, 
+                hsl(${hue}, 70%, 50%), 
+                hsl(${hue + 20}, 70%, 60%), 
+                hsl(${hue + 40}, 70%, 40%))`;
+        }
+        
+        // Интерактивная коробка
+        const schrodingerBox = document.getElementById('schrodingerBox');
+        schrodingerBox.addEventListener('click', function() {
+            // Анимация клика
+            this.style.transform = 'scale(0.95)';
+            this.style.boxShadow = '0 0 40px var(--accent)';
+            
+            // Случайное сообщение
+            const messages = [
+                "Мяу! Не трогай коробку!",
+                "Квантовая система возмущена!",
+                "Наблюдение влияет на результат!",
+                "Коллапс волновой функции!",
+                "Кот в суперпозиции, не мешай!"
+            ];
+            
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            
+            // Создаем всплывающее сообщение
+            const popup = document.createElement('div');
+            popup.textContent = message;
+            popup.style.cssText = `
+                position: absolute;
+                top: -50px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--accent);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                z-index: 100;
+                box-shadow: 0 5px 20px var(--glow);
+                animation: fadeUp 2s ease forwards;
+            `;
+            
+            // Добавляем стили для анимации
+            const popupStyle = document.createElement('style');
+            popupStyle.textContent = `
+                @keyframes fadeUp {
+                    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                    20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                }
+            `;
+            document.head.appendChild(popupStyle);
+            
+            this.appendChild(popup);
+            
+            // Возвращаем коробку в исходное состояние
+            setTimeout(() => {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            }, 200);
+            
+            // Удаляем сообщение
+            setTimeout(() => {
+                popup.remove();
+                popupStyle.remove();
+            }, 2000);
+        });
+        
+        // Загрузка темы
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            } else if (savedTheme === 'dark') {
+                document.body.classList.remove('light-theme');
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                if (prefersLight) {
+                    document.body.classList.add('light-theme');
+                }
+            }
+        }
+        
+        // Инициализация
+        loadTheme();
+        createParticles();
+        updateStatistics();
+        
+        // Обновляем статистику каждые 3 секунды
+        setInterval(updateStatistics, 3000);
+        
+        // Меняем состояние каждые 5 секунд
+        setInterval(() => {
+            const cat = document.querySelector('.cat');
+            cat.style.opacity = Math.random() > 0.5 ? '0.8' : '0.2';
+        }, 5000);
+        
+        // Слушаем изменения системной темы
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    document.body.classList.add('light-theme');
+                } else {
+                    document.body.classList.remove('light-theme');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
