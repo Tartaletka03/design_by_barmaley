@@ -74,5 +74,5 @@ const MANUAL_CARD_LIST = [
     { number: 63, filename: "card63.webp" },
     { number: 64, filename: "card64.webp" },
     { number: 65, filename: "card65.webp" },
-    // { number: 66, filename: "card66.webp" },
+    { number: 66, filename: "card66.webp" },
 ];
