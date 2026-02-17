@@ -1451,7 +1451,7 @@ body.light-theme .mobile-menu-toggle:hover {
     pointer-events: auto;
 }
 
-/* Контакты в хедере - НОВАЯ ВЕРСИЯ БЕЗ ОВАЛА */
+/* ========== ДЕСКТОПНЫЕ КОНТАКТЫ (БЕЗ ОВАЛА) ========== */
 .desktop-contacts-wrapper {
     display: flex;
     align-items: center;
@@ -1461,7 +1461,6 @@ body.light-theme .mobile-menu-toggle:hover {
     flex-wrap: wrap;
 }
 
-/* Стиль для десктопных контактов с текстом */
 .contact-link-with-text {
     display: flex;
     align-items: center;
@@ -1482,17 +1481,13 @@ body.light-theme .mobile-menu-toggle:hover {
     box-shadow: 0 8px 25px var(--glow);
 }
 
-.contact-link-with-text i {
-    font-size: 1.3rem;
-}
-
 .contact-link-with-text span {
     font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 0.3px;
 }
 
-/* Telegram стиль */
+/* Telegram */
 .contact-link-with-text.telegram {
     background: rgba(0, 136, 204, 0.15);
     border-color: rgba(0, 136, 204, 0.3);
@@ -1507,7 +1502,7 @@ body.light-theme .mobile-menu-toggle:hover {
     color: #0088cc;
 }
 
-/* Discord стиль */
+/* Discord */
 .contact-link-with-text.discord {
     background: rgba(88, 101, 242, 0.15);
     border-color: rgba(88, 101, 242, 0.3);
@@ -1522,7 +1517,7 @@ body.light-theme .mobile-menu-toggle:hover {
     color: #5865F2;
 }
 
-/* Boosty стиль */
+/* Boosty */
 .contact-link-with-text.boosty {
     background: rgba(245, 158, 11, 0.15);
     border-color: rgba(245, 158, 11, 0.3);
@@ -1533,11 +1528,18 @@ body.light-theme .mobile-menu-toggle:hover {
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
 }
 
-.contact-link-with-text.boosty i {
-    color: #f59e0b;
+.boosty-icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(500%) hue-rotate(350deg);
+    transition: filter 0.3s ease;
 }
 
-/* Мобильные контакты - С ЦВЕТАМИ */
+.contact-link-with-text.boosty:hover .boosty-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* ========== МОБИЛЬНЫЕ КОНТАКТЫ (С ЦВЕТАМИ) ========== */
 .mobile-contact-links {
     display: flex;
     flex-direction: column;
@@ -1558,11 +1560,6 @@ body.light-theme .mobile-menu-toggle:hover {
 
 .mobile-contact-link:hover {
     transform: translateX(5px);
-}
-
-.mobile-contact-link i {
-    font-size: 1.2rem;
-    width: 24px;
 }
 
 .mobile-contact-link span {
@@ -1603,26 +1600,53 @@ body.light-theme .mobile-menu-toggle:hover {
     border-color: rgba(245, 158, 11, 0.2);
 }
 
-.mobile-contact-link.boosty i {
-    color: #f59e0b;
+.mobile-contact-link.boosty .boosty-icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(500%) hue-rotate(350deg);
+    transition: filter 0.3s ease;
 }
 
 .mobile-contact-link.boosty:hover {
     background: rgba(245, 158, 11, 0.2);
 }
 
-/* Светлая тема для Boosty */
+.mobile-contact-link.boosty:hover .boosty-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* ========== ЕДИНЫЙ РАЗМЕР ДЛЯ ВСЕХ ИКОНОК ========== */
+.contact-link-with-text i,
+.contact-link-with-text .boosty-icon {
+    font-size: 1.3rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-contact-link i,
+.mobile-contact-link .boosty-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========== СВЕТЛАЯ ТЕМА ========== */
 body.light-theme .contact-link-with-text.boosty {
     background: rgba(245, 158, 11, 0.1);
     border-color: rgba(245, 158, 11, 0.2);
 }
 
-body.light-theme .contact-link-with-text.boosty i {
-    color: #f59e0b;
+body.light-theme .contact-link-with-text.boosty .boosty-icon {
+    filter: brightness(0) saturate(100%) invert(50%) sepia(80%) saturate(500%) hue-rotate(350deg);
 }
 
-body.light-theme .contact-link-with-text.boosty:hover {
-    background: rgba(245, 158, 11, 0.15);
+body.light-theme .contact-link-with-text.boosty:hover .boosty-icon {
+    filter: brightness(0) invert(1);
 }
 
 body.light-theme .mobile-contact-link.boosty {
@@ -1630,20 +1654,20 @@ body.light-theme .mobile-contact-link.boosty {
     border-color: rgba(245, 158, 11, 0.15);
 }
 
-body.light-theme .mobile-contact-link.boosty i {
-    color: #f59e0b;
+body.light-theme .mobile-contact-link.boosty .boosty-icon {
+    filter: brightness(0) saturate(100%) invert(50%) sepia(80%) saturate(500%) hue-rotate(350deg);
 }
 
-body.light-theme .mobile-contact-link.boosty:hover {
-    background: rgba(245, 158, 11, 0.12);
+body.light-theme .mobile-contact-link.boosty:hover .boosty-icon {
+    filter: brightness(0) invert(1);
 }
 
-/* Удаляем старые стили для .header-contacts.desktop-contacts */
+/* ========== УДАЛЯЕМ СТАРЫЙ ОВАЛ ========== */
 .header-contacts.desktop-contacts {
     display: none;
 }
 
-/* Обновляем адаптивность */
+/* ========== АДАПТИВНОСТЬ ========== */
 @media (min-width: 769px) {
     .desktop-contacts-wrapper {
         gap: 15px;
@@ -1667,8 +1691,10 @@ body.light-theme .mobile-contact-link.boosty:hover {
         padding: 10px 14px;
     }
     
-    .mobile-contact-link i {
+    .mobile-contact-link i,
+    .mobile-contact-link .boosty-icon {
         width: 20px;
+        height: 20px;
         font-size: 1.1rem;
     }
     
