@@ -6,7 +6,7 @@ const FILTERS_CONFIG = {
 };
 
 // ОСНОВНЫЕ КАРТЫ (показываются на главной)
-const FEATURED_CARDS = [68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30, 26, 25, 16, 15];
+const FEATURED_CARDS = [70, 68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30, 26, 25, 16, 15];
 
 // РУЧНОЙ СПИСОК КАРТОЧЕК - ДОБАВЛЯЙ СЮДА САМ!
 const MANUAL_CARD_LIST = [
@@ -78,4 +78,5 @@ const MANUAL_CARD_LIST = [
     { number: 67, filename: "card67.webp" },
     { number: 68, filename: "card68.webp" },
     { number: 69, filename: "card69.webp" },
+    // { number: 70, filename: "card70.webp" },
 ];

@@ -1450,3 +1450,229 @@ body.light-theme .mobile-menu-toggle:hover {
     user-select: none;
     pointer-events: auto;
 }
+
+/* Контакты в хедере - НОВАЯ ВЕРСИЯ БЕЗ ОВАЛА */
+.desktop-contacts-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+/* Стиль для десктопных контактов с текстом */
+.contact-link-with-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 20px;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+    min-width: 140px;
+    transition: all 0.3s ease;
+}
+
+.contact-link-with-text:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px var(--glow);
+}
+
+.contact-link-with-text i {
+    font-size: 1.3rem;
+}
+
+.contact-link-with-text span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Telegram стиль */
+.contact-link-with-text.telegram {
+    background: rgba(0, 136, 204, 0.15);
+    border-color: rgba(0, 136, 204, 0.3);
+}
+
+.contact-link-with-text.telegram:hover {
+    background: rgba(0, 136, 204, 0.25);
+    box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
+}
+
+.contact-link-with-text.telegram i {
+    color: #0088cc;
+}
+
+/* Discord стиль */
+.contact-link-with-text.discord {
+    background: rgba(88, 101, 242, 0.15);
+    border-color: rgba(88, 101, 242, 0.3);
+}
+
+.contact-link-with-text.discord:hover {
+    background: rgba(88, 101, 242, 0.25);
+    box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+}
+
+.contact-link-with-text.discord i {
+    color: #5865F2;
+}
+
+/* Boosty стиль */
+.contact-link-with-text.boosty {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.contact-link-with-text.boosty:hover {
+    background: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+}
+
+.contact-link-with-text.boosty i {
+    color: #f59e0b;
+}
+
+/* Мобильные контакты - С ЦВЕТАМИ */
+.mobile-contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobile-contact-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid;
+    transition: all 0.3s ease;
+}
+
+.mobile-contact-link:hover {
+    transform: translateX(5px);
+}
+
+.mobile-contact-link i {
+    font-size: 1.2rem;
+    width: 24px;
+}
+
+.mobile-contact-link span {
+    font-size: 0.95rem;
+}
+
+/* Telegram мобильный */
+.mobile-contact-link.telegram {
+    background: rgba(0, 136, 204, 0.1);
+    border-color: rgba(0, 136, 204, 0.2);
+}
+
+.mobile-contact-link.telegram i {
+    color: #0088cc;
+}
+
+.mobile-contact-link.telegram:hover {
+    background: rgba(0, 136, 204, 0.2);
+}
+
+/* Discord мобильный */
+.mobile-contact-link.discord {
+    background: rgba(88, 101, 242, 0.1);
+    border-color: rgba(88, 101, 242, 0.2);
+}
+
+.mobile-contact-link.discord i {
+    color: #5865F2;
+}
+
+.mobile-contact-link.discord:hover {
+    background: rgba(88, 101, 242, 0.2);
+}
+
+/* Boosty мобильный */
+.mobile-contact-link.boosty {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.mobile-contact-link.boosty i {
+    color: #f59e0b;
+}
+
+.mobile-contact-link.boosty:hover {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+/* Светлая тема для Boosty */
+body.light-theme .contact-link-with-text.boosty {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+body.light-theme .contact-link-with-text.boosty i {
+    color: #f59e0b;
+}
+
+body.light-theme .contact-link-with-text.boosty:hover {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+body.light-theme .mobile-contact-link.boosty {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+
+body.light-theme .mobile-contact-link.boosty i {
+    color: #f59e0b;
+}
+
+body.light-theme .mobile-contact-link.boosty:hover {
+    background: rgba(245, 158, 11, 0.12);
+}
+
+/* Удаляем старые стили для .header-contacts.desktop-contacts */
+.header-contacts.desktop-contacts {
+    display: none;
+}
+
+/* Обновляем адаптивность */
+@media (min-width: 769px) {
+    .desktop-contacts-wrapper {
+        gap: 15px;
+        margin-top: 25px;
+    }
+    
+    .contact-link-with-text {
+        min-width: 130px;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop-contacts-wrapper {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-contact-link {
+        padding: 10px 14px;
+    }
+    
+    .mobile-contact-link i {
+        width: 20px;
+        font-size: 1.1rem;
+    }
+    
+    .mobile-contact-link span {
+        font-size: 0.9rem;
+    }
+}
