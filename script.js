@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarClose = document.getElementById('sidebarClose');
     const mobileThemeToggle = document.getElementById('mobileThemeToggle');
     const desktopThemeToggle = document.getElementById('desktopThemeToggle');
+    const mobileContactLink = document.getElementById('mobileContactLink');
     
     let currentCards = [];
     let activeFilters = [];
@@ -709,6 +710,21 @@ document.addEventListener('DOMContentLoaded', function() {
         sortAscBtn.classList.remove('active');
         filterAndDisplayCards();
     });
+
+    // Открытие меню по клику на "Свяжитесь со мной!" (только на мобильных)
+    if (mobileContactLink) {
+        function handleMobileContactClick(e) {
+            // Проверяем, что мы на мобильном устройстве
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMobileMenu();
+            }
+        }
+        
+        mobileContactLink.addEventListener('click', handleMobileContactClick);
+        mobileContactLink.addEventListener('touchend', handleMobileContactClick);
+    }
     
     showMoreBtn.addEventListener('click', showAllCards);
     showLessBtn.addEventListener('click', showFeaturedCards);

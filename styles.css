@@ -1702,3 +1702,46 @@ body.light-theme .mobile-contact-link.boosty:hover .boosty-icon {
         font-size: 0.9rem;
     }
 }
+
+/* ТОЛЬКО ДЛЯ МОБИЛЬНЫХ: кликабельная надпись "Свяжитесь со мной!" */
+@media (max-width: 768px) {
+    #mobileContactLink {
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    /* Темная тема (по умолчанию) */
+    #mobileContactLink {
+        color: #9d4edd;
+        text-decoration-color: rgba(157, 78, 221, 0.5);
+    }
+    
+    /* Светлая тема */
+    body.light-theme #mobileContactLink {
+        color: #2563eb;
+        text-decoration-color: rgba(37, 99, 235, 0.5);
+    }
+    
+    /* Эффект нажатия */
+    #mobileContactLink:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+/* На десктопе надпись выглядит как обычный текст */
+@media (min-width: 769px) {
+    #mobileContactLink {
+        cursor: default;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    #mobileContactLink:active {
+        opacity: 1;
+        transform: none;
+    }
+}
