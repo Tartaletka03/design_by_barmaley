@@ -4,11 +4,11 @@ const FILTERS_CONFIG = {
         80, 81],
     "RE": [4, 6, 7, 9, 10, 11, 12, 13, 14, 16, 17, 23, 25, 26, 27, 28, 29, 30, 37, 39, 40, 43, 44, 
         45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 67, 68, 69, 70, 71, 72, 
-        73, 74, 76, 77, 78, 79],
+        73, 74, 76, 77, 78, 79, 82, 83, 84],
 };
 
 // ОСНОВНЫЕ КАРТЫ (показываются на главной)
-const FEATURED_CARDS = [79, 78, 68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30, 23, 16];
+const FEATURED_CARDS = [83, 81, 79, 78, 68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30];
 
 // РУЧНОЙ СПИСОК КАРТОЧЕК - ДОБАВЛЯЙ СЮДА САМ!
 const MANUAL_CARD_LIST = [
@@ -92,4 +92,7 @@ const MANUAL_CARD_LIST = [
     { number: 79, filename: "card79.webp" },
     { number: 80, filename: "card80.webp" },
     { number: 81, filename: "card81.webp" },
+    { number: 82, filename: "card82.webp" },
+    { number: 83, filename: "card83.webp" },
+    // { number: 84, filename: "card84.webp" },
 ];
