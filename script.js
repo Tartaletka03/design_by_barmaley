@@ -135,6 +135,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // 2. Исправляем ссылку на Google Drive (прямой просмотр)
+        let originalArtUrl = cardInfo.original_art_url || '';
+        let fixedArtUrl = originalArtUrl;
+        if (originalArtUrl.includes('drive.google.com') && originalArtUrl.includes('/file/d/')) {
+            const match = originalArtUrl.match(/\/file\/d\/([^\/]+)/);
+            if (match) {
+                fixedArtUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            }
+        }
         
         // 3. Заполняем содержимое
         detailsBody.innerHTML = `
