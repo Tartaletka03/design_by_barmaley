@@ -1745,3 +1745,285 @@ body.light-theme .mobile-contact-link.boosty:hover .boosty-icon {
         transform: none;
     }
 }
+
+
+
+
+/* Стиль кнопки "Подробнее" под картинкой в модальном окне */
+.detail-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 20px;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.detail-link:hover {
+    transform: scale(1.05);
+    background: var(--accent-hover);
+    box-shadow: 0 0 15px var(--glow);
+}
+
+/* Модальное окно деталей */
+#detailsModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 2100;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#detailsModal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.details-modal-content {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: zoomIn 0.3s ease;
+}
+
+.details-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.details-modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin: 0;
+}
+
+.details-close-btn {
+    position: static;
+    width: 36px;
+    height: 36px;
+    background: rgba(0,0,0,0.5);
+}
+
+.details-body {
+    padding: 24px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.details-body p {
+    margin-bottom: 16px;
+}
+
+.details-body a {
+    color: var(--accent);
+    text-decoration: underline;
+    word-break: break-all;
+}
+
+.details-body img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.details-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(138, 43, 226, 0.2);
+    text-align: center;
+}
+
+.back-to-main-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-to-main-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--glow);
+}
+
+/* Подсказка при первом посещении */
+.first-visit-tooltip {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 300px;
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    border-left: 4px solid var(--accent);
+    z-index: 3000;
+    animation: slideInRight 0.4s ease;
+    font-size: 0.9rem;
+}
+
+.first-visit-tooltip p {
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.first-visit-tooltip .tooltip-highlight {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-weight: 500;
+    color: var(--accent);
+}
+
+.first-visit-tooltip .tooltip-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.first-visit-tooltip .tooltip-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Светлая тема для подсказки и деталей */
+body.light-theme .first-visit-tooltip {
+    background: rgba(255, 255, 255, 0.95);
+    border-left-color: var(--accent);
+}
+
+body.light-theme .details-modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+
+/* Стилизация скроллбара для модального окна деталей (поддерживает тёмную/светлую тему) */
+.details-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.details-modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.details-modal-content::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.details-modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
+
+/* Для Firefox */
+.details-modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(0, 0, 0, 0.2);
+}
+
+/* Светлая тема – более светлый трек, но thumb остаётся по цвету темы */
+body.light-theme .details-modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .details-modal-content::-webkit-scrollbar-thumb {
+    background: var(--accent);
+}
+
+body.light-theme .details-modal-content {
+    scrollbar-color: var(--accent) rgba(0, 0, 0, 0.1);
+}
+
+
+/* Отключаем выделение текста при двойном клике на всей странице */
+body {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; /* стандартное свойство */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+}
+
+
+/* Toast-уведомление */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Светлая тема */
+body.light-theme .toast-notification {
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(37, 99, 235, 0.3);
+    color: var(--text);
+}

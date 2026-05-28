@@ -149,8 +149,24 @@
             </div>
         </div>
 
+        <!-- Существующее модальное окно для увеличения карточки -->
         <div class="modal" id="imageModal">
-            <div class="modal-content">
+            <div class="modal-content"></div>
+        </div>
+
+        <!-- НОВОЕ: модальное окно для подробной информации -->
+        <div class="modal" id="detailsModal">
+            <div class="details-modal-content">
+                <div class="details-modal-header">
+                    <h2>Подробнее о карточке</h2>
+                    <div class="modal-close-btn details-close-btn">×</div>
+                </div>
+                <div class="details-body" id="detailsBody">
+                    <!-- сюда будет загружаться содержимое -->
+                </div>
+                <div class="details-footer">
+                    <button class="back-to-main-btn" id="backToMainBtn">← Вернуться на главную</button>
+                </div>
             </div>
         </div>
 

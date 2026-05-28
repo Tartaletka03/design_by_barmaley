@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const imageModal = document.getElementById('imageModal');
+    const detailsModal = document.getElementById('detailsModal');
     const cardsContainer = document.getElementById('cardsContainer');
     const filtersContainer = document.getElementById('filtersContainer');
     const sortAscBtn = document.getElementById('sortAsc');
@@ -26,60 +27,165 @@ document.addEventListener('DOMContentLoaded', function() {
     let filterMode = 'or';
     let isFullView = false;
     let totalCardsCount = 0;
-    
-    // Инициализация фильтров
-    function initializeFilters() {
-        // Добавляем кнопку "Все"
-        const allButton = document.createElement('button');
-        allButton.className = 'filter-btn active';
-        allButton.textContent = 'Все';
-        allButton.addEventListener('click', () => {
-            activeFilters = [];
-            updateActiveFilters();
-            filterAndDisplayCards();
-        });
-        filtersContainer.appendChild(allButton);
-        
-        // Добавляем остальные фильтры из конфигурации
-        Object.keys(FILTERS_CONFIG).forEach(filterName => {
-            const button = document.createElement('button');
-            button.className = 'filter-btn';
-            button.textContent = filterName;
-            button.addEventListener('click', () => {
-                toggleFilter(filterName);
-            });
-            filtersContainer.appendChild(button);
-        });
-    }
-    
-    // Переключение фильтра
-    function toggleFilter(filterName) {
-        const index = activeFilters.indexOf(filterName);
-        if (index === -1) {
-            activeFilters.push(filterName);
-        } else {
-            activeFilters.splice(index, 1);
-        }
-        updateActiveFilters();
-        filterAndDisplayCards();
-        updateFilterHint();
-    }
-    
-    // Обновление активных фильтров
-    function updateActiveFilters() {
-        const buttons = filtersContainer.querySelectorAll('.filter-btn');
-        buttons.forEach(button => {
-            if (button.textContent === 'Все') {
-                button.classList.toggle('active', activeFilters.length === 0);
-            } else {
-                button.classList.toggle('active', activeFilters.includes(button.textContent));
-            }
-        });
-    }
 
-    // Функция для открытия картинки в полноэкранном режиме
-    function openImageModal(imageSrc) {
-        const modalContent = document.querySelector('.modal-content');
+
+    function openCardFromHash() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#card')) {
+            const cardNumber = parseInt(hash.replace('#card', ''));
+            if (!isNaN(cardNumber) && currentCards.some(c => c.number === cardNumber)) {
+                openDetailsModal(cardNumber);
+            }
+        }
+    }
+    
+
+    // Показать временное уведомление
+    let toastTimeout = null;
+    function showToast(message, duration = 3000) {
+        // Удаляем старый тост, если есть
+        const existingToast = document.querySelector('.toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+            if (toastTimeout) clearTimeout(toastTimeout);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Анимация появления
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Автоматическое исчезновение
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+            toastTimeout = null;
+        }, duration);
+    }
+    
+    // ------------------- ПОДСКАЗКА ПРИ ПЕРВОМ ВИЗИТЕ -------------------
+    function showFirstVisitTooltip() {
+        const hasSeen = localStorage.getItem('tooltipShown');
+        if (hasSeen) return;
+        
+        const tooltip = document.createElement('div');
+        tooltip.className = 'first-visit-tooltip';
+        tooltip.innerHTML = `
+            <p><span class="tooltip-highlight">Если дважды нажать на карточку</span>, то вы сможете разглядеть её поближе.</p>
+            <button class="tooltip-btn" id="tooltipConfirm">Подтвердить</button>
+        `;
+        document.body.appendChild(tooltip);
+        
+        const confirmBtn = tooltip.querySelector('#tooltipConfirm');
+        confirmBtn.addEventListener('click', () => {
+            localStorage.setItem('tooltipShown', 'true');
+            tooltip.remove();
+        });
+        
+        // Автоматическое исчезновение через 10 секунд, но лучше оставить до подтверждения
+        setTimeout(() => {
+            if (tooltip && tooltip.parentNode) {
+                localStorage.setItem('tooltipShown', 'true');
+                tooltip.remove();
+            }
+        }, 15000);
+    }
+    
+    // ------------------- ЗАГРУЗКА JSON ДАННЫХ -------------------
+    let cardsDataCache = null;
+    async function loadCardsData() {
+        if (cardsDataCache) return cardsDataCache;
+        try {
+            const response = await fetch('./cards_data.json');
+            if (!response.ok) throw new Error('JSON не загружен');
+            cardsDataCache = await response.json();
+            return cardsDataCache;
+        } catch (error) {
+            console.warn('Не удалось загрузить cards_data.json', error);
+            return {};
+        }
+    }
+    
+    // ------------------- ОТКРЫТИЕ ДЕТАЛЬНОГО МОДАЛЬНОГО ОКНА -------------------
+    async function openDetailsModal(cardNumber) {
+        const data = await loadCardsData();
+        const cardInfo = data[cardNumber];
+        if (!cardInfo) {
+            showToast('📭 Информация о данной карточке пока не добавлена.', 2500);
+            return;
+        }
+        
+        // Находим карточку в currentCards, чтобы получить путь к файлу
+        const card = currentCards.find(c => c.number == cardNumber);
+        const cardPath = card ? card.path : null;
+        
+        const detailsBody = document.getElementById('detailsBody');
+        
+        // 1. Отображаем саму карту в начале
+        let cardMediaHtml = '';
+        if (cardPath) {
+            const isVideo = cardPath.toLowerCase().endsWith('.webm') || cardPath.toLowerCase().endsWith('.mp4');
+            if (isVideo) {
+                cardMediaHtml = `<video src="${escapeHtml(cardPath)}" autoplay loop muted playsinline style="max-width:100%; border-radius:12px; margin-bottom:20px;"></video>`;
+            } else {
+                cardMediaHtml = `<img src="${escapeHtml(cardPath)}" alt="Карточка ${cardNumber}" style="max-width:100%; border-radius:12px; margin-bottom:20px;">`;
+            }
+        }
+        
+        
+        // 3. Заполняем содержимое
+        detailsBody.innerHTML = `
+            ${cardMediaHtml}
+            <p><strong>🎨 Автор дизайна:</strong> ${escapeHtml(cardInfo.author_design)}</p>
+            <p><strong>📝 Описание:</strong><br>${escapeHtml(cardInfo.description)}</p>
+            <p><strong>🎬 Видео-разбор:</strong> <a href="${escapeHtml(cardInfo.video_review_url)}" target="_blank" rel="noopener noreferrer">Смотреть разбор</a></p>
+            <p><strong>🖼️ Оригинальный арт:</strong><br>
+            <img src="${escapeHtml(fixedArtUrl)}" alt="Оригинальный арт" loading="lazy" 
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Оригинал+не+загрузился';" 
+                style="max-width:100%; border-radius:8px; margin-top:8px;"></p>
+            <p><strong>👤 Автор оригинального арта:</strong> ${escapeHtml(cardInfo.original_art_author)}</p>
+            <p><strong>✍️ Авторство шрифтов:</strong> ${escapeHtml(cardInfo.font_credits)}</p>
+        `;
+        detailsModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeDetailsModal() {
+            detailsModal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function closeBothModalsAndReturnToGallery() {
+        if (imageModal.classList.contains('show')) {
+            closeImageModal();
+        }
+        if (detailsModal.classList.contains('show')) {
+            closeDetailsModal();
+        }
+        // Если хотите сбросить хэш в URL, раскомментируйте:
+        if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // ------------------- МОДАЛЬНОЕ ОКНО УВЕЛИЧЕНИЯ (ТОЛЬКО КРЕСТИК) -------------------
+    function openImageModal(imageSrc, cardNumber) {
+        const modalContent = document.querySelector('#imageModal .modal-content');
         modalContent.innerHTML = '';
         
         const img = document.createElement('img');
@@ -90,34 +196,47 @@ document.addEventListener('DOMContentLoaded', function() {
         img.style.objectFit = 'contain';
         img.style.borderRadius = '8px';
         
-        // АККУРАТНЫЙ КРЕСТИК ДЛЯ ЗАКРЫТИЯ
+        // Крестик
         const closeButton = document.createElement('div');
         closeButton.innerHTML = '×';
         closeButton.className = 'modal-close-btn';
         
-        // Функция закрытия
-        function closeModalHandler(e) {
-            e.preventDefault();
+        // Кнопка "Подробнее"
+        const detailLink = document.createElement('button');
+        detailLink.textContent = 'Подробнее';
+        detailLink.className = 'detail-link';
+        detailLink.addEventListener('click', (e) => {
             e.stopPropagation();
-            closeImageModal();
-            return false;
-        }
+            openDetailsModal(cardNumber);
+        });
         
-        closeButton.addEventListener('click', closeModalHandler);
-        closeButton.addEventListener('touchend', closeModalHandler);
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.height = '100%';
+        container.appendChild(img);
+        container.appendChild(detailLink);
         
-        modalContent.appendChild(img);
+        modalContent.appendChild(container);
         modalContent.appendChild(closeButton);
+        
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         
-        // Предотвращаем скролл на фоне для мобильных
-        document.addEventListener('touchmove', preventScroll, { passive: false });
+        // Закрытие только по крестику
+        const closeHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeImageModal();
+        };
+        closeButton.addEventListener('click', closeHandler);
+        closeButton.addEventListener('touchend', closeHandler);
     }
-
-    // Функция для открытия ВИДЕО в полноэкранном режиме
-    function openVideoModal(videoSrc) {
-        const modalContent = document.querySelector('.modal-content');
+    
+    function openVideoModal(videoSrc, cardNumber) {
+        const modalContent = document.querySelector('#imageModal .modal-content');
         modalContent.innerHTML = '';
         
         const video = document.createElement('video');
@@ -130,206 +249,157 @@ document.addEventListener('DOMContentLoaded', function() {
         video.style.height = '100%';
         video.style.objectFit = 'contain';
         
-        // АККУРАТНЫЙ КРЕСТИК ДЛЯ ЗАКРЫТИЯ
         const closeButton = document.createElement('div');
         closeButton.innerHTML = '×';
         closeButton.className = 'modal-close-btn';
         
-        // Функция закрытия
-        function closeModalHandler(e) {
-            e.preventDefault();
+        const detailLink = document.createElement('button');
+        detailLink.textContent = 'Подробнее';
+        detailLink.className = 'detail-link';
+        detailLink.addEventListener('click', (e) => {
             e.stopPropagation();
-            closeImageModal();
-            return false;
-        }
+            openDetailsModal(cardNumber);
+        });
         
-        closeButton.addEventListener('click', closeModalHandler);
-        closeButton.addEventListener('touchend', closeModalHandler);
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.height = '100%';
+        container.appendChild(video);
+        container.appendChild(detailLink);
         
-        modalContent.appendChild(video);
+        modalContent.appendChild(container);
         modalContent.appendChild(closeButton);
         
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         
-        // Предотвращаем скролл на фоне для мобильных
-        document.addEventListener('touchmove', preventScroll, { passive: false });
+        const closeHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeImageModal();
+        };
+        closeButton.addEventListener('click', closeHandler);
+        closeButton.addEventListener('touchend', closeHandler);
         
-        // Пытаемся запустить видео
-        video.play().catch(e => {
-            console.log('Автовоспроизведение заблокировано');
-        });
+        video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
     }
-
-    // Функция для закрытия модального окна
+    
     function closeImageModal() {
-        const video = document.querySelector('.modal-content video');
+        const video = document.querySelector('#imageModal .modal-content video');
         if (video) {
             video.pause();
             video.currentTime = 0;
         }
-        
         imageModal.classList.remove('show');
         document.body.style.overflow = '';
-        
-        // Восстанавливаем скролл
-        document.removeEventListener('touchmove', preventScroll);
     }
-
-    // Функция предотвращения скролла для модального окна
-    function preventScroll(e) {
-        if (imageModal.classList.contains('show')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-
-    // Обновленная функция для обработки нажатий на карточки
+    
+    // ------------------- ОБРАБОТЧИКИ КАРТОЧЕК (ДВОЙНОЙ КЛИК/ТАП) -------------------
     function setupCardInteractions() {
         const cards = document.querySelectorAll('.card');
-        
         cards.forEach(card => {
-            // Удаляем старые обработчики
             card.removeEventListener('click', handleCardClick);
             card.removeEventListener('touchend', handleCardTouch);
-            
-            // Добавляем новые обработчики
             card.addEventListener('click', handleCardClick);
             card.addEventListener('touchend', handleCardTouch);
         });
     }
-
-    // Обработчик клика для десктопа
+    
     function handleCardClick(e) {
-        // Проверяем, было ли это двойное нажатие
         const currentTime = new Date().getTime();
         const timeSinceLastClick = currentTime - (this.lastClickTime || 0);
-        
         if (timeSinceLastClick < 300) {
-            // Двойной клик - открываем модальное окно
             e.preventDefault();
             e.stopPropagation();
-            
+            const cardNumber = parseInt(this.dataset.number);
             const video = this.querySelector('video');
             const img = this.querySelector('img');
-            
             if (video) {
-                openVideoModal(video.src);
+                openVideoModal(video.src, cardNumber);
             } else if (img) {
-                openImageModal(img.src);
+                openImageModal(img.src, cardNumber);
             }
-            
             this.lastClickTime = 0;
         } else {
-            // Одиночный клик - запоминаем время
             this.lastClickTime = currentTime;
         }
     }
-
-    // Обработчик касания для мобильных
+    
     function handleCardTouch(e) {
-        // Предотвращаем срабатывание при скролле
-        if (this.isScrolling) {
-            return;
-        }
-        
-        // Проверяем, было ли это двойное касание
+        if (this.isScrolling) return;
         const currentTime = new Date().getTime();
         const timeSinceLastTap = currentTime - (this.lastTapTime || 0);
-        
         if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-            // Двойное касание - открываем модальное окно
             e.preventDefault();
             e.stopPropagation();
-            
+            const cardNumber = parseInt(this.dataset.number);
             const video = this.querySelector('video');
             const img = this.querySelector('img');
-            
             if (video) {
-                openVideoModal(video.src);
+                openVideoModal(video.src, cardNumber);
             } else if (img) {
-                openImageModal(img.src);
+                openImageModal(img.src, cardNumber);
             }
-            
             this.lastTapTime = 0;
             this.tapCount = 0;
         } else {
-            // Одиночное касание - запоминаем время
             this.lastTapTime = currentTime;
             this.tapCount = (this.tapCount || 0) + 1;
-            
-            // Сбрасываем счетчик через 500 мс
-            setTimeout(() => {
-                this.tapCount = 0;
-            }, 500);
+            setTimeout(() => { this.tapCount = 0; }, 500);
         }
     }
-
-    // Функция для предотвращения случайных срабатываний при скролле
-    function preventScrollTrigger() {
-        const cards = document.querySelectorAll('.card');
-        
-        cards.forEach(card => {
-            let touchStartY = 0;
-            let touchStartX = 0;
-            let isScrolling = false;
-            
-            card.addEventListener('touchstart', function(e) {
-                touchStartY = e.touches[0].clientY;
-                touchStartX = e.touches[0].clientX;
-                isScrolling = false;
-            });
-            
-            card.addEventListener('touchmove', function(e) {
-                const touchY = e.touches[0].clientY;
-                const touchX = e.touches[0].clientX;
-                const deltaY = Math.abs(touchY - touchStartY);
-                const deltaX = Math.abs(touchX - touchStartX);
-                
-                // Если перемещение больше 10px, считаем это скроллом
-                if (deltaY > 10 || deltaX > 10) {
-                    isScrolling = true;
-                }
-            });
-            
-            card.addEventListener('touchend', function(e) {
-                // Задержка для предотвращения срабатывания при быстром скролле
-                setTimeout(() => {
-                    this.isScrolling = isScrolling;
-                }, 100);
-            });
+    
+    // ------------------- ОСТАЛЬНЫЕ СУЩЕСТВУЮЩИЕ ФУНКЦИИ (НЕ ИЗМЕНЕНЫ) -------------------
+    function initializeFilters() {
+        const allButton = document.createElement('button');
+        allButton.className = 'filter-btn active';
+        allButton.textContent = 'Все';
+        allButton.addEventListener('click', () => {
+            activeFilters = [];
+            updateActiveFilters();
+            filterAndDisplayCards();
+        });
+        filtersContainer.appendChild(allButton);
+        Object.keys(FILTERS_CONFIG).forEach(filterName => {
+            const button = document.createElement('button');
+            button.className = 'filter-btn';
+            button.textContent = filterName;
+            button.addEventListener('click', () => toggleFilter(filterName));
+            filtersContainer.appendChild(button);
         });
     }
     
-    // Загрузка карточек из ручного списка
+    function toggleFilter(filterName) {
+        const index = activeFilters.indexOf(filterName);
+        if (index === -1) activeFilters.push(filterName);
+        else activeFilters.splice(index, 1);
+        updateActiveFilters();
+        filterAndDisplayCards();
+        updateFilterHint();
+    }
+    
+    function updateActiveFilters() {
+        const buttons = filtersContainer.querySelectorAll('.filter-btn');
+        buttons.forEach(button => {
+            if (button.textContent === 'Все') button.classList.toggle('active', activeFilters.length === 0);
+            else button.classList.toggle('active', activeFilters.includes(button.textContent));
+        });
+    }
+    
     function loadCardsFromManualList() {
         try {
             const cardsFolder = './cards/';
-            
-            // Сортируем по номеру от большего к меньшему
             const sortedCards = [...MANUAL_CARD_LIST].sort((a, b) => b.number - a.number);
-            
-            // Проверяем существование файлов
-            const cardsWithPaths = sortedCards.map(card => ({
-                ...card,
-                path: cardsFolder + card.filename
-            }));
-            
-            // Обновляем текущие карточки
+            const cardsWithPaths = sortedCards.map(card => ({ ...card, path: cardsFolder + card.filename }));
             currentCards = cardsWithPaths;
             totalCardsCount = currentCards.length;
-            
             console.log('✅ Загружено карточек из ручного списка:', totalCardsCount);
-            
-            // Показываем избранные карты
             showFeaturedCards();
-            
-            // Обновляем счетчик
             updateCardsCounter();
-            
-            // Показываем успешное уведомление
             showNotification(`✅ Загружено ${totalCardsCount} карточек`, 'success');
-            
         } catch (error) {
             console.error('Ошибка загрузки карточек:', error);
             showNotification('❌ Ошибка загрузки карточек', 'error');
@@ -337,148 +407,84 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Фильтрация и отображение карточек
     function filterAndDisplayCards() {
         let filteredCards = [...currentCards];
         let totalCardsToShow = totalCardsCount;
-        
-        // В режиме избранных показываем только выбранные карты
         if (!isFullView) {
-            filteredCards = filteredCards.filter(card => 
-                FEATURED_CARDS.includes(card.number)
-            );
+            filteredCards = filteredCards.filter(card => FEATURED_CARDS.includes(card.number));
             totalCardsToShow = FEATURED_CARDS.length;
         }
-        
-        // Применяем фильтры, если есть активные (только в полном режиме)
         if (isFullView && activeFilters.length > 0) {
             if (filterMode === 'or') {
                 const filteredNumbers = new Set();
                 activeFilters.forEach(filterName => {
-                    if (FILTERS_CONFIG[filterName]) {
-                        FILTERS_CONFIG[filterName].forEach(num => filteredNumbers.add(num));
-                    }
+                    if (FILTERS_CONFIG[filterName]) FILTERS_CONFIG[filterName].forEach(num => filteredNumbers.add(num));
                 });
-                filteredCards = filteredCards.filter(card => 
-                    filteredNumbers.has(card.number)
-                );
+                filteredCards = filteredCards.filter(card => filteredNumbers.has(card.number));
             } else if (filterMode === 'and') {
-                filteredCards = filteredCards.filter(card => {
-                    return activeFilters.every(filterName => {
-                        return FILTERS_CONFIG[filterName] && FILTERS_CONFIG[filterName].includes(card.number);
-                    });
-                });
+                filteredCards = filteredCards.filter(card => activeFilters.every(filterName => FILTERS_CONFIG[filterName] && FILTERS_CONFIG[filterName].includes(card.number)));
             } else if (filterMode === 'except') {
                 const excludedNumbers = new Set();
                 activeFilters.forEach(filterName => {
-                    if (FILTERS_CONFIG[filterName]) {
-                        FILTERS_CONFIG[filterName].forEach(num => excludedNumbers.add(num));
-                    }
+                    if (FILTERS_CONFIG[filterName]) FILTERS_CONFIG[filterName].forEach(num => excludedNumbers.add(num));
                 });
-                filteredCards = filteredCards.filter(card => 
-                    !excludedNumbers.has(card.number)
-                );
+                filteredCards = filteredCards.filter(card => !excludedNumbers.has(card.number));
             }
         }
-        
-        // Применяем сортировку
-        if (sortDirection === 'desc') {
-            filteredCards.sort((a, b) => b.number - a.number);
-        } else {
-            filteredCards.sort((a, b) => a.number - b.number);
-        }
-        
-        // Отображаем карточки
+        if (sortDirection === 'desc') filteredCards.sort((a, b) => b.number - a.number);
+        else filteredCards.sort((a, b) => a.number - b.number);
         displayCards(filteredCards);
-        
-        // Обновляем счетчик
         updateCardsCounter(filteredCards.length, totalCardsToShow);
-        
-        // Обновляем подсказку
-        if (isFullView) {
-            updateFilterHint();
-        }
+        if (isFullView) updateFilterHint();
     }
     
-    // Отображение карточек
     function displayCards(cards) {
         if (cards.length === 0) {
-            cardsContainer.innerHTML = `
-                <div class="empty-state">
-                    <h3>Карточки не найдены</h3>
-                    <p>${isFullView ? 'Нет карточек, соответствующих выбранным фильтрам.' : 'Избранные карточки не найдены.'}</p>
-                </div>
-            `;
+            cardsContainer.innerHTML = `<div class="empty-state"><h3>Карточки не найдены</h3><p>${isFullView ? 'Нет карточек, соответствующих выбранным фильтрам.' : 'Избранные карточки не найдены.'}</p></div>`;
             return;
         }
-        
         cardsContainer.innerHTML = '';
-        
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
-            
+            cardElement.dataset.number = card.number; // сохраняем номер для обработчика
             const filename = card.filename.toLowerCase();
             const isVideo = filename.endsWith('.webm') || filename.endsWith('.mp4') || filename.endsWith('.mov');
-            
             if (isVideo) {
                 const video = document.createElement('video');
                 video.src = card.path;
-                video.alt = `Видео карточка ${card.number}`;
                 video.loading = 'lazy';
                 video.muted = true;
                 video.loop = true;
                 video.playsInline = true;
-                
-                cardElement.addEventListener('mouseenter', function() {
-                    video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
-                });
-                
-                cardElement.addEventListener('mouseleave', function() {
-                    video.pause();
-                    video.currentTime = 0;
-                });
-                
+                cardElement.addEventListener('mouseenter', () => video.play().catch(e => {}));
+                cardElement.addEventListener('mouseleave', () => { video.pause(); video.currentTime = 0; });
                 cardElement.appendChild(video);
             } else {
                 const img = document.createElement('img');
                 img.src = card.path;
                 img.alt = `Карточка ${card.number}`;
                 img.loading = 'lazy';
-                
                 img.onerror = function() {
-                    console.error(`Не удалось загрузить изображение: ${card.path}`);
                     this.style.display = 'none';
                     const errorDiv = document.createElement('div');
                     errorDiv.innerHTML = `❌<br>Карточка ${card.number}<br>не найдена`;
-                    errorDiv.style.cssText = `
-                        color: var(--text-secondary);
-                        text-align: center;
-                        font-size: 0.9rem;
-                        padding: 20px;
-                    `;
+                    errorDiv.style.cssText = `color: var(--text-secondary); text-align: center; font-size: 0.9rem; padding: 20px;`;
                     cardElement.appendChild(errorDiv);
                 };
-                
                 cardElement.appendChild(img);
             }
-            
             cardsContainer.appendChild(cardElement);
         });
-        
-        // Настраиваем взаимодействие с карточками
         setTimeout(() => {
             setupCardInteractions();
             preventScrollTrigger();
-            
-            // Анимация появления карточек
             const cardElements = cardsContainer.querySelectorAll('.card');
             cardElements.forEach((card, index) => {
                 setTimeout(() => {
                     card.style.opacity = '0';
                     card.style.transform = 'translateY(20px) scale(0.95)';
                     card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-                    
                     setTimeout(() => {
                         card.style.opacity = '1';
                         card.style.transform = 'translateY(0) scale(1)';
@@ -488,170 +494,79 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
     
-    // Обновление счетчика карточек
     function updateCardsCounter(current = 0, total = totalCardsCount) {
         if (counterCurrent && counterTotal) {
             counterCurrent.textContent = current;
             counterTotal.textContent = total;
         }
     }
-
-    // Закрытие по клику на затемненную область
-    imageModal.addEventListener('click', function(e) {
-        if (e.target === imageModal || e.target.classList.contains('modal-close')) {
-            closeImageModal();
-        }
-    });
-
-    // Закрытие по touch на мобильных
-    imageModal.addEventListener('touchend', function(e) {
-        if (e.target === imageModal || e.target.classList.contains('modal-close')) {
-            e.preventDefault();
-            e.stopPropagation();
-            closeImageModal();
-            return false;
-        }
-    });
-
-    // Закрытие по нажатию Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && imageModal.classList.contains('show')) {
-            closeImageModal();
-        }
-    });
     
-    // Показать избранные карты
     function showFeaturedCards() {
         isFullView = false;
         activeFilters = [];
         updateActiveFilters();
-        
-        // Сортируем избранные карты от новых к старым
-        let featuredCards = currentCards.filter(card => 
-            FEATURED_CARDS.includes(card.number)
-        );
-        
-        // Применяем сортировку
-        if (sortDirection === 'desc') {
-            featuredCards.sort((a, b) => b.number - a.number);
-        } else {
-            featuredCards.sort((a, b) => a.number - b.number);
-        }
-        
-        // Отображаем карточки
+        let featuredCards = currentCards.filter(card => FEATURED_CARDS.includes(card.number));
+        if (sortDirection === 'desc') featuredCards.sort((a, b) => b.number - a.number);
+        else featuredCards.sort((a, b) => a.number - b.number);
         displayCards(featuredCards);
-        
         controlsContainer.style.display = 'none';
         filtersSection.classList.remove('show');
         showMoreBtn.style.display = 'block';
         showLessBtn.style.display = 'none';
         foundCardsCounter.style.display = 'none';
-        
-        // Обновляем счетчик
         updateCardsCounter(featuredCards.length, FEATURED_CARDS.length);
-        
-        // Обновляем подсказку
         const filterHint = document.getElementById('filterHint');
-        if (filterHint) {
-            filterHint.textContent = `Показаны избранные карточки (${featuredCards.length} шт.)`;
-        }
+        if (filterHint) filterHint.textContent = `Показаны избранные карточки (${featuredCards.length} шт.)`;
     }
     
-    // Показать все карты с фильтрами
     function showAllCards() {
         isFullView = true;
         controlsContainer.style.display = 'block';
         foundCardsCounter.style.display = 'block';
-        setTimeout(() => {
-            filtersSection.classList.add('show');
-        }, 100);
+        setTimeout(() => filtersSection.classList.add('show'), 100);
         showMoreBtn.style.display = 'none';
         showLessBtn.style.display = 'block';
         filterAndDisplayCards();
     }
     
-    // Функция для обновления подсказки фильтра
     function updateFilterHint() {
         const filterHint = document.getElementById('filterHint');
         if (!filterHint) return;
-        
         if (activeFilters.length === 0) {
             filterHint.textContent = 'Показаны все карточки';
             return;
         }
-        
         const filterNames = activeFilters.join(', ');
-        
-        if (filterMode === 'or') {
-            filterHint.textContent = `Показаны карточки с тегами: ${filterNames}`;
-        } else if (filterMode === 'and') {
-            filterHint.textContent = `Показаны карточки со всеми тегами: ${filterNames}`;
-        } else if (filterMode === 'except') {
-            filterHint.textContent = `Показаны карточки КРОМЕ тегов: ${filterNames}`;
-        }
-    }
-
-    // Сообщение об отсутствии карточек
-    function showNoCardsMessage() {
-        cardsContainer.innerHTML = `
-            <div class="empty-state">
-                <h3>Карточки не найдены</h3>
-                <p>Добавьте карточки в папку cards/ и обновите список в коде</p>
-            </div>
-        `;
+        if (filterMode === 'or') filterHint.textContent = `Показаны карточки с тегами: ${filterNames}`;
+        else if (filterMode === 'and') filterHint.textContent = `Показаны карточки со всеми тегами: ${filterNames}`;
+        else if (filterMode === 'except') filterHint.textContent = `Показаны карточки КРОМЕ тегов: ${filterNames}`;
     }
     
-    // Показать уведомление
-    // function showNotification(message, type = 'info') {
-    //     const existingNotification = document.querySelector('.auto-notification');
-    //     if (existingNotification) {
-    //         existingNotification.remove();
-    //     }
-        
-    //     const notification = document.createElement('div');
-    //     notification.className = 'auto-notification';
-    //     notification.style.cssText = `
-    //         position: fixed;
-    //         top: 80px;
-    //         left: 50%;
-    //         transform: translateX(-50%);
-    //         background: ${type === 'error' ? '#ff4444' : type === 'success' ? '#00c851' : '#33b5e5'};
-    //         color: white;
-    //         padding: 12px 24px;
-    //         border-radius: 25px;
-    //         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    //         z-index: 10000;
-    //         font-size: 0.9rem;
-    //         font-weight: 500;
-    //         backdrop-filter: blur(10px);
-    //         border: 1px solid rgba(255,255,255,0.1);
-    //         text-align: center;
-    //         max-width: 90%;
-    //         opacity: 0;
-    //         transition: opacity 0.3s ease;
-    //     `;
-    //     notification.textContent = message;
-    //     document.body.appendChild(notification);
-        
-    //     // Анимация появления
-    //     setTimeout(() => {
-    //         notification.style.opacity = '1';
-    //     }, 10);
-        
-    //     setTimeout(() => {
-    //         notification.style.opacity = '0';
-    //         setTimeout(() => {
-    //             if (notification.parentNode) {
-    //                 notification.remove();
-    //             }
-    //         }, 300);
-    //     }, 3000);
-    // }
-
-    // Управление темой
+    function showNoCardsMessage() {
+        cardsContainer.innerHTML = `<div class="empty-state"><h3>Карточки не найдены</h3><p>Добавьте карточки в папку cards/ и обновите список в коде</p></div>`;
+    }
+    
+    function showNotification(message, type) {
+        // функция оставлена как заглушка (ранее была закомментирована)
+    }
+    
+    function preventScrollTrigger() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            let touchStartY = 0, touchStartX = 0, isScrolling = false;
+            card.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; isScrolling = false; });
+            card.addEventListener('touchmove', e => {
+                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+                if (deltaY > 10 || deltaX > 10) isScrolling = true;
+            });
+            card.addEventListener('touchend', function() { setTimeout(() => { this.isScrolling = isScrolling; }, 100); });
+        });
+    }
+    
+    // Управление темой (без изменений)
     function toggleTheme() {
         const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-        
         if (currentTheme === 'dark') {
             document.body.classList.add('light-theme');
             localStorage.setItem('theme', 'light');
@@ -664,10 +579,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mobileThemeToggle) mobileThemeToggle.checked = false;
         }
     }
-
+    
     function loadTheme() {
         const savedTheme = localStorage.getItem('theme');
-        
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
             if (desktopThemeToggle) desktopThemeToggle.checked = true;
@@ -689,39 +603,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-
-    // Управление мобильным меню
+    
     function toggleMobileMenu() {
         mobileSidebar.classList.toggle('active');
         document.body.style.overflow = mobileSidebar.classList.contains('active') ? 'hidden' : '';
     }
-
-    // Обработчики событий
-    sortAscBtn.addEventListener('click', function() {
-        sortDirection = 'asc';
-        sortAscBtn.classList.add('active');
-        sortDescBtn.classList.remove('active');
-        filterAndDisplayCards();
-    });
     
-    sortDescBtn.addEventListener('click', function() {
-        sortDirection = 'desc';
-        sortDescBtn.classList.add('active');
-        sortAscBtn.classList.remove('active');
-        filterAndDisplayCards();
-    });
-
-    // Открытие меню по клику на "Свяжитесь со мной!" (только на мобильных)
+    // Обработчики событий
+    sortAscBtn.addEventListener('click', () => { sortDirection = 'asc'; sortAscBtn.classList.add('active'); sortDescBtn.classList.remove('active'); filterAndDisplayCards(); });
+    sortDescBtn.addEventListener('click', () => { sortDirection = 'desc'; sortDescBtn.classList.add('active'); sortAscBtn.classList.remove('active'); filterAndDisplayCards(); });
+    
     if (mobileContactLink) {
-        function handleMobileContactClick(e) {
-            // Проверяем, что мы на мобильном устройстве
-            if (window.innerWidth <= 768) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleMobileMenu();
-            }
-        }
-        
+        function handleMobileContactClick(e) { if (window.innerWidth <= 768) { e.preventDefault(); e.stopPropagation(); toggleMobileMenu(); } }
         mobileContactLink.addEventListener('click', handleMobileContactClick);
         mobileContactLink.addEventListener('touchend', handleMobileContactClick);
     }
@@ -729,7 +622,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showMoreBtn.addEventListener('click', showAllCards);
     showLessBtn.addEventListener('click', showFeaturedCards);
     
-    // Обработчики режимов фильтрации
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -740,34 +632,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Обработчики темы
-    if (desktopThemeToggle) {
-        desktopThemeToggle.addEventListener('change', toggleTheme);
-    }
+    if (desktopThemeToggle) desktopThemeToggle.addEventListener('change', toggleTheme);
+    if (mobileThemeToggle) mobileThemeToggle.addEventListener('change', toggleTheme);
+    if (mobileMenuToggle) mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    if (sidebarClose) sidebarClose.addEventListener('click', toggleMobileMenu);
     
-    if (mobileThemeToggle) {
-        mobileThemeToggle.addEventListener('change', toggleTheme);
-    }
-    
-    // Обработчики мобильного меню
-    if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
-    }
-    
-    if (sidebarClose) {
-        sidebarClose.addEventListener('click', toggleMobileMenu);
-    }
-    
-    // Закрытие меню при клике вне его
     document.addEventListener('click', function(event) {
-        if (mobileSidebar.classList.contains('active') && 
-            !mobileSidebar.contains(event.target) && 
-            !mobileMenuToggle.contains(event.target)) {
-            toggleMobileMenu();
-        }
+        if (mobileSidebar.classList.contains('active') && !mobileSidebar.contains(event.target) && !mobileMenuToggle.contains(event.target)) toggleMobileMenu();
     });
     
-    // Слушаем изменения системной темы
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
         if (!localStorage.getItem('theme')) {
             if (e.matches) {
@@ -782,8 +655,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Закрытие модального окна деталей по крестику и кнопке "На главную"
+    const detailsCloseBtn = document.querySelector('#detailsModal .details-close-btn');
+    const backToMainBtn = document.getElementById('backToMainBtn');
+    if (detailsCloseBtn) detailsCloseBtn.addEventListener('click', closeDetailsModal);
+    if (backToMainBtn) backToMainBtn.addEventListener('click', closeBothModalsAndReturnToGallery); 
+    
     // Инициализация
     initializeFilters();
     loadTheme();
     loadCardsFromManualList();
+    showFirstVisitTooltip(); // показываем подсказку при первом визите
+    openCardFromHash();
+    window.addEventListener('hashchange', function() {
+        if (detailsModal.classList.contains('show')) closeDetailsModal();
+        openCardFromHash();
+    });
 });
