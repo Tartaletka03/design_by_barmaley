@@ -118,46 +118,69 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Находим карточку в currentCards, чтобы получить путь к файлу
+        // Находим карточку в currentCards
         const card = currentCards.find(c => c.number == cardNumber);
         const cardPath = card ? card.path : null;
         
         const detailsBody = document.getElementById('detailsBody');
         
-        // 1. Отображаем саму карту в начале
-        let cardMediaHtml = '';
+        // Формируем HTML только для заполненных полей
+        let html = '';
+        
+        // 1. Сама карта (всегда, если есть файл)
         if (cardPath) {
             const isVideo = cardPath.toLowerCase().endsWith('.webm') || cardPath.toLowerCase().endsWith('.mp4');
             if (isVideo) {
-                cardMediaHtml = `<video src="${escapeHtml(cardPath)}" autoplay loop muted playsinline style="max-width:100%; border-radius:12px; margin-bottom:20px;"></video>`;
+                html += `<video src="${escapeHtml(cardPath)}" autoplay loop muted playsinline style="max-width:100%; border-radius:12px; margin-bottom:20px;"></video>`;
             } else {
-                cardMediaHtml = `<img src="${escapeHtml(cardPath)}" alt="Карточка ${cardNumber}" style="max-width:100%; border-radius:12px; margin-bottom:20px;">`;
+                html += `<img src="${escapeHtml(cardPath)}" alt="Карточка ${cardNumber}" style="max-width:100%; border-radius:12px; margin-bottom:20px;">`;
             }
         }
         
-        // 2. Исправляем ссылку на Google Drive (прямой просмотр)
-        let originalArtUrl = cardInfo.original_art_url || '';
-        let fixedArtUrl = originalArtUrl;
-        if (originalArtUrl.includes('drive.google.com') && originalArtUrl.includes('/file/d/')) {
-            const match = originalArtUrl.match(/\/file\/d\/([^\/]+)/);
-            if (match) {
-                fixedArtUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-            }
+        // 2. Автор дизайна (почти всегда есть, но проверим)
+        if (cardInfo.author_design && cardInfo.author_design.trim() !== '') {
+            html += `<p><strong>🎨 Автор дизайна:</strong> ${escapeHtml(cardInfo.author_design)}</p>`;
         }
         
-        // 3. Заполняем содержимое
-        detailsBody.innerHTML = `
-            ${cardMediaHtml}
-            <p><strong>🎨 Автор дизайна:</strong> ${escapeHtml(cardInfo.author_design)}</p>
-            <p><strong>📝 Описание:</strong><br>${escapeHtml(cardInfo.description)}</p>
-            <p><strong>🎬 Видео-разбор:</strong> <a href="${escapeHtml(cardInfo.video_review_url)}" target="_blank" rel="noopener noreferrer">Смотреть разбор</a></p>
-            <p><strong>🖼️ Оригинальный арт:</strong><br>
-            <img src="${escapeHtml(fixedArtUrl)}" alt="Оригинальный арт" loading="lazy" 
-                onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Оригинал+не+загрузился';" 
-                style="max-width:100%; border-radius:8px; margin-top:8px;"></p>
-            <p><strong>👤 Автор оригинального арта:</strong> ${escapeHtml(cardInfo.original_art_author)}</p>
-            <p><strong>✍️ Авторство шрифтов:</strong> ${escapeHtml(cardInfo.font_credits)}</p>
-        `;
+        // 3. Описание
+        if (cardInfo.description && cardInfo.description.trim() !== '') {
+            html += `<p><strong>📝 Описание:</strong><br>${escapeHtml(cardInfo.description)}</p>`;
+        }
+        
+        // 4. Видео-разбор (только если есть ссылка)
+        if (cardInfo.video_review_url && cardInfo.video_review_url.trim() !== '') {
+            html += `<p><strong>🎬 Видео-разбор:</strong> <a href="${escapeHtml(cardInfo.video_review_url)}" target="_blank" rel="noopener noreferrer">Смотреть разбор</a></p>`;
+        }
+        
+        // 5. Оригинальный арт (только если есть ссылка на изображение)
+        if (cardInfo.original_art_url && cardInfo.original_art_url.trim() !== '') {
+            let fixedArtUrl = cardInfo.original_art_url;
+            if (fixedArtUrl.includes('drive.google.com') && fixedArtUrl.includes('/file/d/')) {
+                const match = fixedArtUrl.match(/\/file\/d\/([^\/]+)/);
+                if (match) fixedArtUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            }
+            html += `<p><strong>🖼️ Оригинальный арт:</strong><br>
+                    <img src="${escapeHtml(fixedArtUrl)}" alt="Оригинальный арт" loading="lazy" 
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Оригинал+не+загрузился';" 
+                    style="max-width:100%; border-radius:8px; margin-top:8px;"></p>`;
+        }
+        
+        // 6. Автор оригинального арта
+        if (cardInfo.original_art_author && cardInfo.original_art_author.trim() !== '') {
+            html += `<p><strong>👤 Автор оригинального арта:</strong> ${escapeHtml(cardInfo.original_art_author)}</p>`;
+        }
+        
+        // 7. Авторство шрифтов
+        if (cardInfo.font_credits && cardInfo.font_credits.trim() !== '') {
+            html += `<p><strong>✍️ Авторство шрифтов:</strong> ${escapeHtml(cardInfo.font_credits)}</p>`;
+        }
+        
+        // Если после всех проверок html пуст — покажем заглушку
+        if (html === '') {
+            html = '<p><em>Нет дополнительной информации о карточке.</em></p>';
+        }
+        
+        detailsBody.innerHTML = html;
         detailsModal.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
