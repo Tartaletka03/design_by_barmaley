@@ -1,8 +1,8 @@
 // КОНФИГУРАЦИЯ ФИЛЬТРОВ (ТЕГОВ)
 const FILTERS_CONFIG = {
-    "Rank: A": [1, 2, 3, 5, 8, 15, 18, 19, 20, 21, 22, 24, 31, 32, 33, 34, 35, 36, 38, 41, 42, 64, 65, 66,
+    "Rank: A": [1, 2, 3, 5, 8, 17, 18, 19, 20, 21, 22, 24, 31, 32, 33, 34, 35, 36, 38, 41, 42, 64, 65, 66,
         80, 81, 85],
-    "Rank: RE": [4, 6, 7, 9, 10, 11, 12, 13, 14, 16, 17, 23, 25, 26, 27, 28, 29, 30, 37, 39, 40, 43, 44, 
+    "Rank: RE": [4, 6, 7, 9, 10, 11, 12, 13, 14, 16, 15, 23, 25, 26, 27, 28, 29, 30, 37, 39, 40, 43, 44, 
         45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 67, 68, 69, 70, 71, 72, 
         73, 74, 76, 77, 78, 79, 82, 83, 84],
 };
@@ -10,90 +10,24 @@ const FILTERS_CONFIG = {
 // ОСНОВНЫЕ КАРТЫ (показываются на главной)
 const FEATURED_CARDS = [83, 81, 79, 78, 68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30];
 
-// РУЧНОЙ СПИСОК КАРТОЧЕК - ДОБАВЛЯЙ СЮДА САМ!
-const MANUAL_CARD_LIST = [
-    { number: 1, filename: "card1.webp" },
-    { number: 2, filename: "card2.webp" },
-    { number: 3, filename: "card3.webp" },
-    { number: 4, filename: "card4.webp" },
-    { number: 5, filename: "card5.webp" },
-    { number: 6, filename: "card6.webp" },
-    { number: 7, filename: "card7.webp" },
-    { number: 8, filename: "card8.webp" },
-    { number: 9, filename: "card9.webp" },
-    { number: 10, filename: "card10.webp" },
-    { number: 11, filename: "card11.webp" },
-    { number: 12, filename: "card12.webp" },
-    { number: 13, filename: "card13.webp" },
-    { number: 14, filename: "card14.webp" },
-    { number: 15, filename: "card15.webp" },
-    { number: 16, filename: "card16.webp" },
-    { number: 17, filename: "card17.webp" },
-    { number: 18, filename: "card18.webp" },
-    { number: 19, filename: "card19.webp" },
-    { number: 20, filename: "card20.webp" },
-    { number: 21, filename: "card21.webp" },
-    { number: 22, filename: "card22.webp" },
-    { number: 23, filename: "card23.webp" },
-    { number: 24, filename: "card24.webp" },
-    { number: 25, filename: "card25.webp" },
-    { number: 26, filename: "card26.webp" },
-    { number: 27, filename: "card27.webp" },
-    { number: 28, filename: "card28.webp" },
-    { number: 29, filename: "card29.webp" },
-    { number: 30, filename: "card30.webp" },
-    { number: 31, filename: "card31.webp" },
-    { number: 32, filename: "card32.webp" },
-    { number: 33, filename: "card33.webp" },
-    { number: 34, filename: "card34.webp" },
-    { number: 35, filename: "card35.webp" },
-    { number: 36, filename: "card36.webp" },
-    { number: 37, filename: "card37.webp" },
-    { number: 38, filename: "card38.webp" },
-    { number: 39, filename: "card39.webp" },
-    { number: 40, filename: "card40.webp" },
-    { number: 41, filename: "card41.webp" },
-    { number: 42, filename: "card42.webp" },
-    { number: 43, filename: "card43.webp" },
-    { number: 44, filename: "card44.webp" },
-    { number: 45, filename: "card45.webp" },
-    { number: 46, filename: "card46.webp" },
-    { number: 47, filename: "card47.webp" },
-    { number: 48, filename: "card48.webp" },
-    { number: 49, filename: "card49.webp" },
-    { number: 50, filename: "card50.webp" },
-    { number: 51, filename: "card51.webp" },
-    { number: 52, filename: "card52.webp" },
-    { number: 53, filename: "card53.webp" },
-    { number: 54, filename: "card54.webp" },
-    { number: 55, filename: "card55.webp" },
-    { number: 56, filename: "card56.webp" },
-    { number: 57, filename: "card57.webp" },
-    { number: 59, filename: "card59.webp" },
-    { number: 60, filename: "card60.webp" },
-    { number: 61, filename: "card61.webp" },
-    { number: 62, filename: "card62.webp" },
-    { number: 63, filename: "card63.webp" },
-    { number: 64, filename: "card64.webp" },
-    { number: 65, filename: "card65.webp" },
-    { number: 66, filename: "card66.webp" },
-    { number: 67, filename: "card67.webp" },
-    { number: 68, filename: "card68.webp" },
-    { number: 69, filename: "card69.webp" },
-    { number: 70, filename: "card70.webp" },
-    { number: 71, filename: "card71.webp" },
-    { number: 72, filename: "card72.webp" },
-    { number: 73, filename: "card73.webp" },
-    { number: 74, filename: "card74.webp" },
-    // { number: 75, filename: "card75.webp" },
-    { number: 76, filename: "card76.webp" },
-    { number: 77, filename: "card77.webp" },
-    { number: 78, filename: "card78.webp" },
-    { number: 79, filename: "card79.webp" },
-    { number: 80, filename: "card80.webp" },
-    { number: 81, filename: "card81.webp" },
-    { number: 82, filename: "card82.webp" },
-    { number: 83, filename: "card83.webp" },
-    { number: 84, filename: "card84.webp" },
-    { number: 85, filename: "card85.webp" },
-];
+
+
+
+
+// ========== НАСТРОЙКИ ГЕНЕРАЦИИ СПИСКА КАРТ ==========
+const MAX_CARD_NUMBER = 85;        // последний номер карты
+const EXCLUDED_NUMBERS = [58, 75]; // номера, которых нет (пропускаем) | 58-карта с тайного санты, а 75-дизайн с осколками
+
+// Если какие-то карты — видео (webm), укажите их номера здесь
+const VIDEO_NUMBERS = []; // например, [101, 102]
+
+// Автоматически генерируем MANUAL_CARD_LIST
+const MANUAL_CARD_LIST = (() => {
+    const list = [];
+    for (let i = 1; i <= MAX_CARD_NUMBER; i++) {
+        if (EXCLUDED_NUMBERS.includes(i)) continue;
+        const ext = VIDEO_NUMBERS.includes(i) ? 'webm' : 'webp';
+        list.push({ number: i, filename: `card${i}.${ext}` });
+    }
+    return list;
+})();
