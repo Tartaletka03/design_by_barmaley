@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const counterCurrent = document.getElementById('counterCurrent');
     const counterTotal = document.getElementById('counterTotal');
     
-    // Элементы мобильного меню
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const mobileSidebar = document.getElementById('mobileSidebar');
     const sidebarClose = document.getElementById('sidebarClose');
@@ -24,10 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentCards = [];
     let activeFilters = [];
     let sortDirection = 'desc';
-    let filterMode = 'or';
     let isFullView = false;
     let totalCardsCount = 0;
-
 
     function openCardFromHash() {
         const hash = window.location.hash;
@@ -38,27 +35,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
 
-    // Показать временное уведомление
     let toastTimeout = null;
     function showToast(message, duration = 3000) {
-        // Удаляем старый тост, если есть
         const existingToast = document.querySelector('.toast-notification');
         if (existingToast) {
             existingToast.remove();
             if (toastTimeout) clearTimeout(toastTimeout);
         }
-        
         const toast = document.createElement('div');
         toast.className = 'toast-notification';
         toast.textContent = message;
         document.body.appendChild(toast);
-        
-        // Анимация появления
         setTimeout(() => toast.classList.add('show'), 10);
-        
-        // Автоматическое исчезновение
         toastTimeout = setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
@@ -66,11 +55,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }, duration);
     }
     
-    // ------------------- ПОДСКАЗКА ПРИ ПЕРВОМ ВИЗИТЕ -------------------
     function showFirstVisitTooltip() {
         const hasSeen = localStorage.getItem('tooltipShown');
         if (hasSeen) return;
-        
         const tooltip = document.createElement('div');
         tooltip.className = 'first-visit-tooltip';
         tooltip.innerHTML = `
@@ -78,14 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <button class="tooltip-btn" id="tooltipConfirm">Подтвердить</button>
         `;
         document.body.appendChild(tooltip);
-        
         const confirmBtn = tooltip.querySelector('#tooltipConfirm');
         confirmBtn.addEventListener('click', () => {
             localStorage.setItem('tooltipShown', 'true');
             tooltip.remove();
         });
-        
-        // Автоматическое исчезновение через 10 секунд, но лучше оставить до подтверждения
         setTimeout(() => {
             if (tooltip && tooltip.parentNode) {
                 localStorage.setItem('tooltipShown', 'true');
@@ -94,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 15000);
     }
     
-    // ------------------- ЗАГРУЗКА JSON ДАННЫХ -------------------
     let cardsDataCache = null;
     async function loadCardsData() {
         if (cardsDataCache) return cardsDataCache;
@@ -109,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ------------------- ОТКРЫТИЕ ДЕТАЛЬНОГО МОДАЛЬНОГО ОКНА -------------------
     async function openDetailsModal(cardNumber) {
         const data = await loadCardsData();
         const cardInfo = data[cardNumber];
@@ -117,17 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast('📭 Информация о данной карточке пока не добавлена.', 2500);
             return;
         }
-        
-        // Находим карточку в currentCards
         const card = currentCards.find(c => c.number == cardNumber);
         const cardPath = card ? card.path : null;
-        
         const detailsBody = document.getElementById('detailsBody');
-        
-        // Формируем HTML только для заполненных полей
         let html = '';
-        
-        // 1. Сама карта (всегда, если есть файл)
         if (cardPath) {
             const isVideo = cardPath.toLowerCase().endsWith('.webm') || cardPath.toLowerCase().endsWith('.mp4');
             if (isVideo) {
@@ -136,23 +111,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 html += `<img src="${escapeHtml(cardPath)}" alt="Карточка ${cardNumber}" style="max-width:100%; border-radius:12px; margin-bottom:20px;">`;
             }
         }
-        
-        // 2. Автор дизайна (почти всегда есть, но проверим)
         if (cardInfo.author_design && cardInfo.author_design.trim() !== '') {
             html += `<p><strong>🎨 Автор дизайна:</strong> ${escapeHtml(cardInfo.author_design)}</p>`;
         }
-        
-        // 3. Описание
         if (cardInfo.description && cardInfo.description.trim() !== '') {
             html += `<p><strong>📝 Описание:</strong><br>${escapeHtml(cardInfo.description)}</p>`;
         }
-        
-        // 4. Видео-разбор (только если есть ссылка)
         if (cardInfo.video_review_url && cardInfo.video_review_url.trim() !== '') {
             html += `<p><strong>🎬 Видео-разбор:</strong> <a href="${escapeHtml(cardInfo.video_review_url)}" target="_blank" rel="noopener noreferrer">Смотреть разбор</a></p>`;
         }
-        
-        // 5. Оригинальный арт (только если есть ссылка на изображение)
         if (cardInfo.original_art_url && cardInfo.original_art_url.trim() !== '') {
             let fixedArtUrl = cardInfo.original_art_url;
             if (fixedArtUrl.includes('drive.google.com') && fixedArtUrl.includes('/file/d/')) {
@@ -164,43 +131,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Оригинал+не+загрузился';" 
                     style="max-width:100%; border-radius:8px; margin-top:8px;"></p>`;
         }
-        
-        // 6. Автор оригинального арта
         if (cardInfo.original_art_author && cardInfo.original_art_author.trim() !== '') {
             html += `<p><strong>👤 Автор оригинального арта:</strong> ${escapeHtml(cardInfo.original_art_author)}</p>`;
         }
-        
-        // 7. Авторство шрифтов
         if (cardInfo.font_credits && cardInfo.font_credits.trim() !== '') {
             html += `<p><strong>✍️ Авторство шрифтов:</strong> ${escapeHtml(cardInfo.font_credits)}</p>`;
         }
-        
-        // Если после всех проверок html пуст — покажем заглушку
-        if (html === '') {
-            html = '<p><em>Нет дополнительной информации о карточке.</em></p>';
-        }
-        
+        if (html === '') html = '<p><em>Нет дополнительной информации о карточке.</em></p>';
         detailsBody.innerHTML = html;
         detailsModal.classList.add('show');
         document.body.style.overflow = 'hidden';
     }
     
     function closeDetailsModal() {
-            detailsModal.classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        function closeBothModalsAndReturnToGallery() {
-        if (imageModal.classList.contains('show')) {
-            closeImageModal();
-        }
-        if (detailsModal.classList.contains('show')) {
-            closeDetailsModal();
-        }
-        // Если хотите сбросить хэш в URL, раскомментируйте:
-        if (window.location.hash) {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-        }
+        detailsModal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function closeBothModalsAndReturnToGallery() {
+        if (imageModal.classList.contains('show')) closeImageModal();
+        if (detailsModal.classList.contains('show')) closeDetailsModal();
+        if (window.location.hash) history.pushState("", document.title, window.location.pathname + window.location.search);
     }
     
     function escapeHtml(str) {
@@ -210,16 +160,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
-        });
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) { return c; });
     }
     
-    // ------------------- МОДАЛЬНОЕ ОКНО УВЕЛИЧЕНИЯ (ТОЛЬКО КРЕСТИК) -------------------
     function openImageModal(imageSrc, cardNumber) {
         const modalContent = document.querySelector('#imageModal .modal-content');
         modalContent.innerHTML = '';
-        
         const img = document.createElement('img');
         img.src = imageSrc;
         img.alt = "Увеличенная карточка";
@@ -227,13 +173,9 @@ document.addEventListener('DOMContentLoaded', function() {
         img.style.maxHeight = '100%';
         img.style.objectFit = 'contain';
         img.style.borderRadius = '8px';
-        
-        // Крестик
         const closeButton = document.createElement('div');
         closeButton.innerHTML = '×';
         closeButton.className = 'modal-close-btn';
-        
-        // Кнопка "Подробнее"
         const detailLink = document.createElement('button');
         detailLink.textContent = 'Подробнее';
         detailLink.className = 'detail-link';
@@ -241,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             openDetailsModal(cardNumber);
         });
-        
         const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
@@ -250,14 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
         container.style.height = '100%';
         container.appendChild(img);
         container.appendChild(detailLink);
-        
         modalContent.appendChild(container);
         modalContent.appendChild(closeButton);
-        
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
-        
-        // Закрытие только по крестику
         const closeHandler = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -270,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function openVideoModal(videoSrc, cardNumber) {
         const modalContent = document.querySelector('#imageModal .modal-content');
         modalContent.innerHTML = '';
-        
         const video = document.createElement('video');
         video.src = videoSrc;
         video.autoplay = true;
@@ -280,11 +216,9 @@ document.addEventListener('DOMContentLoaded', function() {
         video.style.width = '100%';
         video.style.height = '100%';
         video.style.objectFit = 'contain';
-        
         const closeButton = document.createElement('div');
         closeButton.innerHTML = '×';
         closeButton.className = 'modal-close-btn';
-        
         const detailLink = document.createElement('button');
         detailLink.textContent = 'Подробнее';
         detailLink.className = 'detail-link';
@@ -292,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             openDetailsModal(cardNumber);
         });
-        
         const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
@@ -301,13 +234,10 @@ document.addEventListener('DOMContentLoaded', function() {
         container.style.height = '100%';
         container.appendChild(video);
         container.appendChild(detailLink);
-        
         modalContent.appendChild(container);
         modalContent.appendChild(closeButton);
-        
         imageModal.classList.add('show');
         document.body.style.overflow = 'hidden';
-        
         const closeHandler = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -315,7 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         closeButton.addEventListener('click', closeHandler);
         closeButton.addEventListener('touchend', closeHandler);
-        
         video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
     }
     
@@ -329,7 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     }
     
-    // ------------------- ОБРАБОТЧИКИ КАРТОЧЕК (ДВОЙНОЙ КЛИК/ТАП) -------------------
     function setupCardInteractions() {
         const cards = document.querySelectorAll('.card');
         cards.forEach(card => {
@@ -349,11 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardNumber = parseInt(this.dataset.number);
             const video = this.querySelector('video');
             const img = this.querySelector('img');
-            if (video) {
-                openVideoModal(video.src, cardNumber);
-            } else if (img) {
-                openImageModal(img.src, cardNumber);
-            }
+            if (video) openVideoModal(video.src, cardNumber);
+            else if (img) openImageModal(img.src, cardNumber);
             this.lastClickTime = 0;
         } else {
             this.lastClickTime = currentTime;
@@ -370,11 +295,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardNumber = parseInt(this.dataset.number);
             const video = this.querySelector('video');
             const img = this.querySelector('img');
-            if (video) {
-                openVideoModal(video.src, cardNumber);
-            } else if (img) {
-                openImageModal(img.src, cardNumber);
-            }
+            if (video) openVideoModal(video.src, cardNumber);
+            else if (img) openImageModal(img.src, cardNumber);
             this.lastTapTime = 0;
             this.tapCount = 0;
         } else {
@@ -384,24 +306,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ------------------- ОСТАЛЬНЫЕ СУЩЕСТВУЮЩИЕ ФУНКЦИИ (НЕ ИЗМЕНЕНЫ) -------------------
     function initializeFilters() {
         const allButton = document.createElement('button');
         allButton.className = 'filter-btn active';
         allButton.textContent = 'Все';
+        allButton.setAttribute('data-filter-name', 'Все');
         allButton.addEventListener('click', () => {
             activeFilters = [];
             updateActiveFilters();
             filterAndDisplayCards();
+            if (isFullView) updateFilterCounts();
         });
         filtersContainer.appendChild(allButton);
+        
         Object.keys(FILTERS_CONFIG).forEach(filterName => {
             const button = document.createElement('button');
             button.className = 'filter-btn';
             button.textContent = filterName;
+            button.setAttribute('data-filter-name', filterName);
             button.addEventListener('click', () => toggleFilter(filterName));
             filtersContainer.appendChild(button);
         });
+        if (isFullView) updateFilterCounts();
     }
     
     function toggleFilter(filterName) {
@@ -411,13 +337,49 @@ document.addEventListener('DOMContentLoaded', function() {
         updateActiveFilters();
         filterAndDisplayCards();
         updateFilterHint();
+        if (isFullView) updateFilterCounts();
     }
     
     function updateActiveFilters() {
         const buttons = filtersContainer.querySelectorAll('.filter-btn');
         buttons.forEach(button => {
-            if (button.textContent === 'Все') button.classList.toggle('active', activeFilters.length === 0);
-            else button.classList.toggle('active', activeFilters.includes(button.textContent));
+            const filterName = button.getAttribute('data-filter-name');
+            if (filterName === 'Все') {
+                button.classList.toggle('active', activeFilters.length === 0);
+            } else {
+                button.classList.toggle('active', activeFilters.includes(filterName));
+            }
+        });
+    }
+    
+    function updateFilterCounts() {
+        if (!isFullView) return;
+        const allButton = Array.from(filtersContainer.querySelectorAll('.filter-btn')).find(btn => btn.getAttribute('data-filter-name') === 'Все');
+        const totalAllCards = currentCards.length;
+        if (allButton) {
+            if (activeFilters.length === 0) {
+                allButton.innerHTML = `Все`;
+                allButton.removeAttribute('data-count');
+            } else {
+                allButton.innerHTML = `Все <span class="filter-count">${totalAllCards}</span>`;
+                allButton.setAttribute('data-count', totalAllCards);
+            }
+        }
+        const filterButtons = Array.from(filtersContainer.querySelectorAll('.filter-btn')).filter(btn => btn.getAttribute('data-filter-name') !== 'Все');
+        filterButtons.forEach(btn => {
+            const filterName = btn.getAttribute('data-filter-name');
+            const filterNumbers = FILTERS_CONFIG[filterName] || [];
+            let count;
+            if (activeFilters.length === 0) {
+                count = filterNumbers.filter(num => currentCards.some(c => c.number === num)).length;
+            } else {
+                const testFilters = [...activeFilters, filterName];
+                count = currentCards.filter(card => {
+                    return testFilters.every(f => FILTERS_CONFIG[f] && FILTERS_CONFIG[f].includes(card.number));
+                }).length;
+            }
+            btn.innerHTML = `${filterName} <span class="filter-count">${count}</span>`;
+            btn.setAttribute('data-count', count);
         });
     }
     
@@ -428,13 +390,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardsWithPaths = sortedCards.map(card => ({ ...card, path: cardsFolder + card.filename }));
             currentCards = cardsWithPaths;
             totalCardsCount = currentCards.length;
-            console.log('✅ Загружено карточек из ручного списка:', totalCardsCount);
+            console.log('✅ Загружено карточек:', totalCardsCount);
             showFeaturedCards();
             updateCardsCounter();
-            showNotification(`✅ Загружено ${totalCardsCount} карточек`, 'success');
         } catch (error) {
             console.error('Ошибка загрузки карточек:', error);
-            showNotification('❌ Ошибка загрузки карточек', 'error');
             showNoCardsMessage();
         }
     }
@@ -447,27 +407,20 @@ document.addEventListener('DOMContentLoaded', function() {
             totalCardsToShow = FEATURED_CARDS.length;
         }
         if (isFullView && activeFilters.length > 0) {
-            if (filterMode === 'or') {
-                const filteredNumbers = new Set();
-                activeFilters.forEach(filterName => {
-                    if (FILTERS_CONFIG[filterName]) FILTERS_CONFIG[filterName].forEach(num => filteredNumbers.add(num));
-                });
-                filteredCards = filteredCards.filter(card => filteredNumbers.has(card.number));
-            } else if (filterMode === 'and') {
-                filteredCards = filteredCards.filter(card => activeFilters.every(filterName => FILTERS_CONFIG[filterName] && FILTERS_CONFIG[filterName].includes(card.number)));
-            } else if (filterMode === 'except') {
-                const excludedNumbers = new Set();
-                activeFilters.forEach(filterName => {
-                    if (FILTERS_CONFIG[filterName]) FILTERS_CONFIG[filterName].forEach(num => excludedNumbers.add(num));
-                });
-                filteredCards = filteredCards.filter(card => !excludedNumbers.has(card.number));
-            }
+            filteredCards = filteredCards.filter(card => {
+                return activeFilters.every(filterName => 
+                    FILTERS_CONFIG[filterName] && FILTERS_CONFIG[filterName].includes(card.number)
+                );
+            });
         }
         if (sortDirection === 'desc') filteredCards.sort((a, b) => b.number - a.number);
         else filteredCards.sort((a, b) => a.number - b.number);
         displayCards(filteredCards);
         updateCardsCounter(filteredCards.length, totalCardsToShow);
-        if (isFullView) updateFilterHint();
+        if (isFullView) {
+            updateFilterHint();
+            updateFilterCounts();
+        }
     }
     
     function displayCards(cards) {
@@ -479,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
-            cardElement.dataset.number = card.number; // сохраняем номер для обработчика
+            cardElement.dataset.number = card.number;
             const filename = card.filename.toLowerCase();
             const isVideo = filename.endsWith('.webm') || filename.endsWith('.mp4') || filename.endsWith('.mov');
             if (isVideo) {
@@ -537,9 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isFullView = false;
         activeFilters = [];
         updateActiveFilters();
-        let featuredCards = currentCards.filter(card => FEATURED_CARDS.includes(card.number));
-        if (sortDirection === 'desc') featuredCards.sort((a, b) => b.number - a.number);
-        else featuredCards.sort((a, b) => a.number - b.number);
+        const featuredCards = FEATURED_CARDS.map(num => currentCards.find(card => card.number === num)).filter(card => card);
         displayCards(featuredCards);
         controlsContainer.style.display = 'none';
         filtersSection.classList.remove('show');
@@ -559,6 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showMoreBtn.style.display = 'none';
         showLessBtn.style.display = 'block';
         filterAndDisplayCards();
+        updateFilterCounts();
     }
     
     function updateFilterHint() {
@@ -569,17 +521,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         const filterNames = activeFilters.join(', ');
-        if (filterMode === 'or') filterHint.textContent = `Показаны карточки с тегами: ${filterNames}`;
-        else if (filterMode === 'and') filterHint.textContent = `Показаны карточки со всеми тегами: ${filterNames}`;
-        else if (filterMode === 'except') filterHint.textContent = `Показаны карточки КРОМЕ тегов: ${filterNames}`;
+        filterHint.textContent = `Показаны карточки, содержащие ВСЕ теги: ${filterNames}`;
     }
     
     function showNoCardsMessage() {
         cardsContainer.innerHTML = `<div class="empty-state"><h3>Карточки не найдены</h3><p>Добавьте карточки в папку cards/ и обновите список в коде</p></div>`;
-    }
-    
-    function showNotification(message, type) {
-        // функция оставлена как заглушка (ранее была закомментирована)
     }
     
     function preventScrollTrigger() {
@@ -596,7 +542,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Управление темой (без изменений)
     function toggleTheme() {
         const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
         if (currentTheme === 'dark') {
@@ -641,7 +586,38 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = mobileSidebar.classList.contains('active') ? 'hidden' : '';
     }
     
-    // Обработчики событий
+    function updateHtmlAndScrollbar() {
+        const isLight = document.body.classList.contains('light-theme');
+        const htmlBg = isLight ? '#f8fafc' : '#0a0a0f';
+        document.documentElement.style.backgroundColor = htmlBg;
+        const thumbColor = isLight ? '#2563eb' : '#8a2be2';
+        const thumbHover = isLight ? '#1d4ed8' : '#9d3ef5';
+        const trackColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.25)';
+        let style = document.getElementById('custom-scrollbar-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'custom-scrollbar-style';
+            document.head.appendChild(style);
+        }
+        style.textContent = `
+            ::-webkit-scrollbar { width: 12px; height: 12px; }
+            ::-webkit-scrollbar-track { background: ${trackColor} !important; border-radius: 12px !important; margin: 4px 0 !important; }
+            ::-webkit-scrollbar-thumb { background: ${thumbColor} !important; border-radius: 12px !important; }
+            ::-webkit-scrollbar-thumb:hover { background: ${thumbHover} !important; }
+            * { scrollbar-width: thin !important; scrollbar-color: ${thumbColor} ${trackColor} !important; }
+        `;
+    }
+    
+    if ('ontouchstart' in window) {
+        document.body.addEventListener('touchstart', (e) => {
+            const btn = e.target.closest('.filter-btn, .sort-btn, .mode-btn, .view-toggle-btn');
+            if (btn) {
+                btn.classList.add('tap-active');
+                setTimeout(() => btn.classList.remove('tap-active'), 200);
+            }
+        });
+    }
+    
     sortAscBtn.addEventListener('click', () => { sortDirection = 'asc'; sortAscBtn.classList.add('active'); sortDescBtn.classList.remove('active'); filterAndDisplayCards(); });
     sortDescBtn.addEventListener('click', () => { sortDirection = 'desc'; sortDescBtn.classList.add('active'); sortAscBtn.classList.remove('active'); filterAndDisplayCards(); });
     
@@ -653,16 +629,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     showMoreBtn.addEventListener('click', showAllCards);
     showLessBtn.addEventListener('click', showFeaturedCards);
-    
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            filterMode = this.dataset.mode;
-            filterAndDisplayCards();
-            updateFilterHint();
-        });
-    });
     
     if (desktopThemeToggle) desktopThemeToggle.addEventListener('change', toggleTheme);
     if (mobileThemeToggle) mobileThemeToggle.addEventListener('change', toggleTheme);
@@ -687,20 +653,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Закрытие модального окна деталей по крестику и кнопке "На главную"
     const detailsCloseBtn = document.querySelector('#detailsModal .details-close-btn');
     const backToMainBtn = document.getElementById('backToMainBtn');
     if (detailsCloseBtn) detailsCloseBtn.addEventListener('click', closeDetailsModal);
-    if (backToMainBtn) backToMainBtn.addEventListener('click', closeBothModalsAndReturnToGallery); 
+    if (backToMainBtn) backToMainBtn.addEventListener('click', closeBothModalsAndReturnToGallery);
     
-    // Инициализация
     initializeFilters();
     loadTheme();
     loadCardsFromManualList();
-    showFirstVisitTooltip(); // показываем подсказку при первом визите
+    showFirstVisitTooltip();
     openCardFromHash();
     window.addEventListener('hashchange', function() {
         if (detailsModal.classList.contains('show')) closeDetailsModal();
         openCardFromHash();
     });
+    
+    updateHtmlAndScrollbar();
+    if (desktopThemeToggle) desktopThemeToggle.addEventListener('change', () => setTimeout(updateHtmlAndScrollbar, 30));
+    if (mobileThemeToggle) mobileThemeToggle.addEventListener('change', () => setTimeout(updateHtmlAndScrollbar, 30));
+    const observer = new MutationObserver(() => updateHtmlAndScrollbar());
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 });

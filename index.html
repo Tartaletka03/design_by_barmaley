@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109551044', 'ym');
+
+        ym(109551044, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/109551044" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -66,6 +79,14 @@
                         <img src="https://tartaletka03.github.io/design_by_barmaley/boosty.svg" alt="Boosty" class="boosty-icon">
                         <span>Boosty</span>
                     </a>
+                    <a href="https://vk.com/club235399761" target="_blank" class="mobile-contact-link vk" title="VK">
+                        <i class="fab fa-vk"></i>
+                        <span>VK</span>
+                    </a>
+                    <a href="https://ru.pinterest.com/Designs_by_Barmaley/" target="_blank" class="mobile-contact-link pinterest" title="Pinterest">
+                        <i class="fab fa-pinterest"></i>
+                        <span>Pinterest</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -87,11 +108,11 @@
                 </label>
             </div>
             
-            <p>Хотите уникальный дизайн карточки? А может хотите что-то иное? <span id="mobileContactLink">Свяжитесь со мной!</span></p>
+            <p>Хотите уникальный дизайн карточки? А может хотите что-то иное? <span id="mobileContactLink">Свяжитесь со мной любым удобным способом!</span></p>
             
             <!-- Контакты в хедере (только для десктопа с текстом) -->
             <div class="desktop-contacts-wrapper">
-                <a href="https://t.me/NoT_TFound" target="_blank" class="contact-link-with-text telegram" title="Telegram">
+                <a href="https://t.me/cards_by_barmaley" target="_blank" class="contact-link-with-text telegram" title="Telegram">
                     <i class="fab fa-telegram"></i>
                     <span>Telegram</span>
                 </a>
@@ -102,6 +123,14 @@
                 <a href="https://boosty.to/re_barmaley" target="_blank" class="contact-link-with-text boosty" title="Boosty">
                     <img src="https://tartaletka03.github.io/design_by_barmaley/boosty.svg" alt="Boosty" class="boosty-icon">
                     <span>Boosty</span>
+                </a>
+                <a href="https://vk.com/club235399761" target="_blank" class="contact-link-with-text vk" title="VK">
+                    <i class="fab fa-vk"></i>
+                    <span>VK</span>
+                </a>
+                <a href="https://ru.pinterest.com/Designs_by_Barmaley/" target="_blank" class="contact-link-with-text pinterest" title="Pinterest">
+                    <i class="fab fa-pinterest"></i>
+                    <span>Pinterest</span>
                 </a>
             </div>
         </header>
@@ -114,20 +143,20 @@
 
         <div class="controls-container" id="controlsContainer" style="display: none;">
             <div class="sort-controls">
-                <button class="sort-btn" id="sortAsc">По возрастанию</button>
-                <button class="sort-btn active" id="sortDesc">По убыванию</button>
+                <div class="sort-label">По времени создания:</div>
+                <div class="sort-buttons">
+                    <button class="sort-btn" id="sortAsc">Сначала старые</button>
+                    <button class="sort-btn active" id="sortDesc">Сначала новые</button>
+                </div>
             </div>
-
-            <!-- <div class="filter-mode">
-                <button class="mode-btn active" data-mode="or">ИЛИ (любой тег)</button>
-                <button class="mode-btn" data-mode="and">И (все теги)</button>
-                <button class="mode-btn" data-mode="except">КРОМЕ (исключить)</button>
-            </div> -->
-
+                <div class="sort-label">Отобразить:</div>
             <div class="filters-section" id="filtersSection">
+
                 <div class="controls" id="filtersContainer">
                     <!-- Фильтры будут добавлены через JavaScript -->
                 </div>
+                
+            </div>
                 <div class="filter-hint" id="filterHint">
                     <!-- Подсказка будет обновляться через JavaScript -->
                 </div>
@@ -135,8 +164,6 @@
                 <div class="found-cards-counter" id="foundCardsCounter">
                     <span class="counter-number" id="counterCurrent">0</span> из <span class="counter-number" id="counterTotal">0</span>
                 </div>
-            </div>
-
             <div class="view-toggle-section">
                 <button class="view-toggle-btn secondary" id="showLessBtn">👁️ Показать меньше карт</button>
             </div>

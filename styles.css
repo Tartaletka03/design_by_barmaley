@@ -1,3 +1,10 @@
+/* Базовый фон html (виден при прокрутке за пределами контента) */
+/* Убираем белые поля за пределами контента — базовый фон, но скрипт его перезапишет */
+html {
+    background: #0a0a0f; /* временно, скрипт изменит */
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -395,16 +402,22 @@ input:checked + .slider + .theme-icons .sun {
     opacity: 0;
     max-height: 0;
     overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease; /* убираем transition для max-height */
+    display: flex;
+    justify-content: center;   /* центрируем дочерний .controls */
 }
 
 .filters-section.show {
     opacity: 1;
-    max-height: 200px;
+    max-height: none;          /* убираем ограничение высоты */
+    overflow: visible;
     margin-bottom: 25px;
 }
 
 .controls {
+    max-width: 600px;        /* максимальная ширина блока с кнопками (подберите своё значение) */
+    margin: 15px auto;       /* центрируем блок */
+    width: 100%;
     display: flex;
     justify-content: center;
     gap: 12px;
@@ -421,7 +434,8 @@ input:checked + .slider + .theme-icons .sun {
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
-    min-width: 100px;
+    min-width: 80px;
+    flex: 0 1 auto;
 }
 
 .filter-btn:hover {
@@ -1528,17 +1542,6 @@ body.light-theme .mobile-menu-toggle:hover {
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
 }
 
-.boosty-icon {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(500%) hue-rotate(350deg);
-    transition: filter 0.3s ease;
-}
-
-.contact-link-with-text.boosty:hover .boosty-icon {
-    filter: brightness(0) invert(1);
-}
-
 /* ========== МОБИЛЬНЫЕ КОНТАКТЫ (С ЦВЕТАМИ) ========== */
 .mobile-contact-links {
     display: flex;
@@ -1600,17 +1603,6 @@ body.light-theme .mobile-menu-toggle:hover {
     border-color: rgba(245, 158, 11, 0.2);
 }
 
-.mobile-contact-link.boosty .boosty-icon {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(500%) hue-rotate(350deg);
-    transition: filter 0.3s ease;
-}
-
-.mobile-contact-link.boosty:hover {
-    background: rgba(245, 158, 11, 0.2);
-}
-
 .mobile-contact-link.boosty:hover .boosty-icon {
     filter: brightness(0) invert(1);
 }
@@ -1641,25 +1633,10 @@ body.light-theme .contact-link-with-text.boosty {
     border-color: rgba(245, 158, 11, 0.2);
 }
 
-body.light-theme .contact-link-with-text.boosty .boosty-icon {
-    filter: brightness(0) saturate(100%) invert(50%) sepia(80%) saturate(500%) hue-rotate(350deg);
-}
-
-body.light-theme .contact-link-with-text.boosty:hover .boosty-icon {
-    filter: brightness(0) invert(1);
-}
 
 body.light-theme .mobile-contact-link.boosty {
     background: rgba(245, 158, 11, 0.08);
     border-color: rgba(245, 158, 11, 0.15);
-}
-
-body.light-theme .mobile-contact-link.boosty .boosty-icon {
-    filter: brightness(0) saturate(100%) invert(50%) sepia(80%) saturate(500%) hue-rotate(350deg);
-}
-
-body.light-theme .mobile-contact-link.boosty:hover .boosty-icon {
-    filter: brightness(0) invert(1);
 }
 
 /* ========== УДАЛЯЕМ СТАРЫЙ ОВАЛ ========== */
@@ -1940,7 +1917,7 @@ body.light-theme .details-modal-content {
 }
 
 
-/* Стилизация скроллбара для модального окна деталей (поддерживает тёмную/светлую тему) */
+/* Стилизация скроллбара для модального окна деталей (поддерживает тёмную/светлую тему)
 .details-modal-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -1960,13 +1937,13 @@ body.light-theme .details-modal-content {
     background: var(--accent-hover);
 }
 
-/* Для Firefox */
+ Для Firefox 
 .details-modal-content {
     scrollbar-width: thin;
     scrollbar-color: var(--accent) rgba(0, 0, 0, 0.2);
 }
 
-/* Светлая тема – более светлый трек, но thumb остаётся по цвету темы */
+ Светлая тема – более светлый трек, но thumb остаётся по цвету темы 
 body.light-theme .details-modal-content::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
 }
@@ -1977,7 +1954,7 @@ body.light-theme .details-modal-content::-webkit-scrollbar-thumb {
 
 body.light-theme .details-modal-content {
     scrollbar-color: var(--accent) rgba(0, 0, 0, 0.1);
-}
+}  */
 
 
 /* Отключаем выделение текста при двойном клике на всей странице */
@@ -2026,4 +2003,256 @@ body.light-theme .toast-notification {
     background: rgba(255,255,255,0.95);
     border-color: rgba(37, 99, 235, 0.3);
     color: var(--text);
+}
+
+
+
+/* ========== КАСТОМНЫЙ СКРОЛЛБАР ДЛЯ ВСЕЙ СТРАНИЦЫ (CSS, БЕЗ СКРИПТА) ========== */
+/* Базовые цвета для тёмной темы */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    margin: 4px 0;
+}
+::-webkit-scrollbar-thumb {
+    background: #8a2be2;
+    border-radius: 12px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #9d3ef5;
+}
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #8a2be2 rgba(0, 0, 0, 0.25);
+}
+
+/* ========== СВЕТЛАЯ ТЕМА — ПЕРЕОПРЕДЕЛЯЕМ ЦВЕТА СКРОЛЛБАРА ========== */
+body.light-theme ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+body.light-theme ::-webkit-scrollbar-thumb {
+    background: #2563eb;
+}
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: #1d4ed8;
+}
+body.light-theme * {
+    scrollbar-color: #2563eb rgba(0, 0, 0, 0.08);
+}
+
+
+
+
+/* Убираем стандартный серый фон при тапе */
+button, .filter-btn, .sort-btn, .mode-btn, .view-toggle-btn {
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Сбрасываем outline при фокусе (не мешает доступности) */
+button:focus, .filter-btn:focus, .sort-btn:focus, .mode-btn:focus, .view-toggle-btn:focus {
+    outline: none;
+}
+
+/* На устройствах без мыши (touch) — отключаем :hover, чтобы он не оставался после касания */
+@media (hover: none) {
+    .filter-btn:hover,
+    .sort-btn:hover,
+    .mode-btn:hover,
+    .view-toggle-btn:hover {
+        background: inherit !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Класс, который добавляется при касании (подсветка) */
+.tap-active {
+    background: var(--accent) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px var(--glow) !important;
+}
+
+/* Для светлой темы — тот же акцентный цвет */
+body.light-theme .tap-active {
+    background: var(--accent) !important;
+}
+
+
+
+
+.sort-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sort-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.sort-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Мобильные */
+@media (max-width: 480px) {
+    .sort-label {
+        font-size: 0.8rem;
+    }
+    .sort-buttons {
+        gap: 10px;
+    }
+}
+
+
+
+
+/* ========== УМЕНЬШЕННЫЕ И АККУРАТНЫЕ КНОПКИ ========== */
+/* Умеренное уменьшение кнопок */
+.sort-btn, .filter-btn, .mode-btn, .view-toggle-btn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    min-width: auto;
+    border-radius: 24px;
+}
+
+.view-toggle-btn {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    min-width: 200px;
+    height: 44px;
+}
+
+/* Мобильные — чуть меньше, но не экстремально */
+@media (max-width: 768px) {
+    .sort-btn, .filter-btn, .mode-btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+    .view-toggle-btn {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+        min-width: 170px;
+        height: 40px;
+    }
+}
+
+
+.filter-count {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 0px 6px;
+    margin-left: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    vertical-align: middle;
+}
+body.light-theme .filter-count {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--text);
+}
+
+
+
+/* ========== НОВЫЕ ССЫЛКИ: VK и PINTEREST ========== */
+/* Десктоп */
+.contact-link-with-text.vk {
+    background: rgba(0, 102, 204, 0.15);
+    border-color: rgba(0, 102, 204, 0.3);
+}
+.contact-link-with-text.vk:hover {
+    background: rgba(0, 102, 204, 0.25);
+    box-shadow: 0 8px 25px rgba(0, 102, 204, 0.4);
+}
+.contact-link-with-text.vk i {
+    color: #0077ff;
+}
+
+.contact-link-with-text.pinterest {
+    background: rgba(189, 8, 28, 0.15);
+    border-color: rgba(189, 8, 28, 0.3);
+}
+.contact-link-with-text.pinterest:hover {
+    background: rgba(189, 8, 28, 0.25);
+    box-shadow: 0 8px 25px rgba(189, 8, 28, 0.4);
+}
+.contact-link-with-text.pinterest i {
+    color: #bd081c;
+}
+
+/* Мобильные */
+.mobile-contact-link.vk {
+    background: rgba(0, 102, 204, 0.1);
+    border-color: rgba(0, 102, 204, 0.2);
+}
+.mobile-contact-link.vk i {
+    color: #0077ff;
+}
+.mobile-contact-link.vk:hover {
+    background: rgba(0, 102, 204, 0.2);
+}
+
+.mobile-contact-link.pinterest {
+    background: rgba(189, 8, 28, 0.1);
+    border-color: rgba(189, 8, 28, 0.2);
+}
+.mobile-contact-link.pinterest i {
+    color: #bd081c;
+}
+.mobile-contact-link.pinterest:hover {
+    background: rgba(189, 8, 28, 0.2);
+}
+
+/* Boosty иконка — без фильтров, всегда оригинальный цвет */
+.contact-link-with-text.boosty .boosty-icon,
+.mobile-contact-link.boosty .boosty-icon {
+    width: 20px;
+    height: 20px;
+    filter: none !important;
+    transition: none;
+}
+
+
+/* ========== BOOSTY: ХОВЕР ТОЛЬКО НА ФОНЕ, ИКОНКА НЕ МЕНЯЕТСЯ ========== */
+.contact-link-with-text.boosty {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+    transition: all 0.3s ease;
+}
+.contact-link-with-text.boosty:hover {
+    background: rgba(245, 158, 11, 0.35); /* светлее, чем 0.15 */
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    transform: translateY(-3px);
+}
+.contact-link-with-text.boosty .boosty-icon,
+.mobile-contact-link.boosty .boosty-icon {
+    filter: none !important;
+    transition: none;
+}
+.contact-link-with-text.boosty:hover .boosty-icon,
+.mobile-contact-link.boosty:hover .boosty-icon {
+    filter: none !important;
+}
+
+/* Мобильный Boosty */
+.mobile-contact-link.boosty {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+.mobile-contact-link.boosty:hover {
+    background: rgba(245, 158, 11, 0.25);
 }
