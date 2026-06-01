@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let isFullView = false;
     let totalCardsCount = 0;
 
+    const YM_COUNTER_ID = 109551044; //  ID СЧЁТЧИКА
+
     function openCardFromHash() {
         const hash = window.location.hash;
         if (hash && hash.startsWith('#card')) {
@@ -141,6 +143,12 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsBody.innerHTML = html;
         detailsModal.classList.add('show');
         document.body.style.overflow = 'hidden';
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'card_open', { card_id: cardNumber });
+            console.log('Отправлено событие: card_open', cardNumber);
+        }
+
     }
     
     function closeDetailsModal() {
@@ -202,6 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         closeButton.addEventListener('click', closeHandler);
         closeButton.addEventListener('touchend', closeHandler);
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
+            console.log('Отправлено событие: card_doubleclick', cardNumber);
+        }
+
     }
     
     function openVideoModal(videoSrc, cardNumber) {
@@ -246,6 +260,12 @@ document.addEventListener('DOMContentLoaded', function() {
         closeButton.addEventListener('click', closeHandler);
         closeButton.addEventListener('touchend', closeHandler);
         video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
+            console.log('Отправлено событие: card_doubleclick', cardNumber);
+        }
+
     }
     
     function closeImageModal() {
@@ -338,6 +358,12 @@ document.addEventListener('DOMContentLoaded', function() {
         filterAndDisplayCards();
         updateFilterHint();
         if (isFullView) updateFilterCounts();
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'filter_click', { filter_name: filterName });
+            console.log('Отправлено событие: filter_click', filterName); // для отладки
+        }
+
     }
     
     function updateActiveFilters() {
@@ -500,6 +526,12 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCardsCounter(featuredCards.length, FEATURED_CARDS.length);
         const filterHint = document.getElementById('filterHint');
         if (filterHint) filterHint.textContent = `Показаны избранные карточки (${featuredCards.length} шт.)`;
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'show_featured_cards');
+            console.log('Отправлено событие: show_featured_cards');
+        }
+
     }
     
     function showAllCards() {
@@ -511,6 +543,12 @@ document.addEventListener('DOMContentLoaded', function() {
         showLessBtn.style.display = 'block';
         filterAndDisplayCards();
         updateFilterCounts();
+
+        if (typeof ym === 'function') {
+            ym(YM_COUNTER_ID, 'reachGoal', 'show_all_cards');
+            console.log('Отправлено событие: show_all_cards');
+        }
+
     }
     
     function updateFilterHint() {
@@ -673,4 +711,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mobileThemeToggle) mobileThemeToggle.addEventListener('change', () => setTimeout(updateHtmlAndScrollbar, 30));
     const observer = new MutationObserver(() => updateHtmlAndScrollbar());
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+
+    // Отслеживание кликов по ссылкам на контакты
+    document.querySelectorAll('.contact-link-with-text, .mobile-contact-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            let platform = '';
+            if (this.classList.contains('telegram')) platform = 'telegram';
+            else if (this.classList.contains('discord')) platform = 'discord';
+            else if (this.classList.contains('boosty')) platform = 'boosty';
+            else if (this.classList.contains('vk')) platform = 'vk';
+            else if (this.classList.contains('pinterest')) platform = 'pinterest';
+            
+            if (platform && typeof ym === 'function') {
+                ym(YM_COUNTER_ID, 'reachGoal', 'social_click', { platform: platform });
+                console.log('Отправлено событие: social_click', platform);
+            }
+        });
+    });
+
 });
