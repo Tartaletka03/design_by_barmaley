@@ -349,13 +349,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         if (isFullView) updateFilterCounts();
     }
+
+    function forceUpdateFilterButtons() {
+        const buttons = filtersContainer.querySelectorAll('.filter-btn');
+        for (let button of buttons) {
+            const filterName = button.getAttribute('data-filter-name');
+            if (filterName === 'Все') {
+                if (activeFilters.length === 0) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            } else {
+                if (activeFilters.includes(filterName)) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            }
+        }
+    }
     
     function toggleFilter(filterName) {
         const index = activeFilters.indexOf(filterName);
         if (index === -1) activeFilters.push(filterName);
         else activeFilters.splice(index, 1);
-        updateActiveFilters();
+        
+        // МГНОВЕННО обновляем внешний вид кнопок (без ожидания перерисовки карточек)
+        forceUpdateFilterButtons();
+        
+        // Принудительный reflow — заставляет браузер немедленно применить стили
+        void document.body.offsetHeight;
+        
+        // Теперь фильтруем карточки (это может занять время, но кнопки уже подсветились)
         filterAndDisplayCards();
+        
         updateFilterHint();
         if (isFullView) updateFilterCounts();
 

@@ -2265,3 +2265,11 @@ body.light-theme .filter-count {
         transition: none !important;
     }
 }
+
+
+/* На телефонах убираем любые анимации/переходы у кнопок фильтров, чтобы они не тормозили */
+@media (pointer: coarse) {
+    .filter-btn {
+        transition: none !important;
+    }
+}
