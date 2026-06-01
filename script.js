@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isFullView = false;
     let totalCardsCount = 0;
 
-    const YM_COUNTER_ID = 109551044; //  ID СЧЁТЧИКА
+    const YM_COUNTER_ID = 109559184; //  ID СЧЁТЧИКА
 
     function openCardFromHash() {
         const hash = window.location.hash;
@@ -644,16 +644,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ::-webkit-scrollbar-thumb:hover { background: ${thumbHover} !important; }
             * { scrollbar-width: thin !important; scrollbar-color: ${thumbColor} ${trackColor} !important; }
         `;
-    }
-    
-    if ('ontouchstart' in window) {
-        document.body.addEventListener('touchstart', (e) => {
-            const btn = e.target.closest('.filter-btn, .sort-btn, .mode-btn, .view-toggle-btn');
-            if (btn) {
-                btn.classList.add('tap-active');
-                setTimeout(() => btn.classList.remove('tap-active'), 200);
-            }
-        });
     }
     
     sortAscBtn.addEventListener('click', () => { sortDirection = 'asc'; sortAscBtn.classList.add('active'); sortDescBtn.classList.remove('active'); filterAndDisplayCards(); });

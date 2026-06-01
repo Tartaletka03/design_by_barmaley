@@ -2071,12 +2071,6 @@ button:focus, .filter-btn:focus, .sort-btn:focus, .mode-btn:focus, .view-toggle-
     }
 }
 
-/* Класс, который добавляется при касании (подсветка) */
-.tap-active {
-    background: var(--accent) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 20px var(--glow) !important;
-}
 
 /* Для светлой темы — тот же акцентный цвет */
 body.light-theme .tap-active {
@@ -2255,4 +2249,19 @@ body.light-theme .filter-count {
 }
 .mobile-contact-link.boosty:hover {
     background: rgba(245, 158, 11, 0.25);
+}
+
+
+
+/* Для сенсорных устройств убираем любую подсветку при касании */
+@media (pointer: coarse) {
+    .filter-btn:active,
+    .sort-btn:active,
+    .mode-btn:active,
+    .view-toggle-btn:active {
+        background: inherit !important;
+        transform: none !important;
+        box-shadow: none !important;
+        transition: none !important;
+    }
 }
