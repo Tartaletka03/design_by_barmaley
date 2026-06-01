@@ -2273,3 +2273,26 @@ body.light-theme .filter-count {
         transition: none !important;
     }
 }
+
+
+/* Для сенсорных устройств полностью отключаем анимацию и переходы у кнопок фильтров */
+@media (pointer: coarse) {
+    .filter-btn {
+        transition: none !important;
+        transform: none !important;
+        will-change: auto !important;
+    }
+    
+    .filter-btn:active {
+        background: inherit !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Активное состояние (включённый фильтр) должно применяться мгновенно */
+    .filter-btn.active {
+        background: var(--accent) !important;
+        transform: none !important;
+        box-shadow: 0 0 20px var(--glow) !important;
+    }
+}
