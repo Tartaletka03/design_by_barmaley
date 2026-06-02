@@ -2296,3 +2296,39 @@ body.light-theme .filter-count {
         box-shadow: 0 0 20px var(--glow) !important;
     }
 }
+
+
+/* Для очень маленьких экранов (телефоны до 480px) */
+@media (max-width: 480px) {
+    .first-visit-tooltip {
+        max-width: 85vw;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        bottom: 15px;
+        right: 15px;
+        left: 15px;      /* растягиваем, но не на всю ширину */
+        right: auto;
+    }
+}
+
+/* Для средних экранов (планшеты, 481–768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .first-visit-tooltip {
+        max-width: 350px;
+        padding: 14px 18px;
+        font-size: 0.9rem;
+        bottom: 20px;
+        right: 20px;
+    }
+}
+
+/* Для больших экранов (ноутбуки и выше) */
+@media (min-width: 769px) {
+    .first-visit-tooltip {
+        max-width: 420px;
+        padding: 18px 24px;
+        font-size: 1rem;
+        bottom: 30px;
+        right: 30px;
+    }
+}

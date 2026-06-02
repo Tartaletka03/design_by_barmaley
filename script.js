@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tooltip = document.createElement('div');
         tooltip.className = 'first-visit-tooltip';
         tooltip.innerHTML = `
-            <p><span class="tooltip-highlight">Если дважды нажать на карточку</span>, то вы сможете разглядеть её поближе.</p>
+            <p><span class="tooltip-highlight">Нажмите на карточку</span>, чтобы разглядеть её поближе.</p>
             <button class="tooltip-btn" id="tooltipConfirm">Подтвердить</button>
         `;
         document.body.appendChild(tooltip);
@@ -277,53 +277,62 @@ document.addEventListener('DOMContentLoaded', function() {
         imageModal.classList.remove('show');
         document.body.style.overflow = '';
     }
-    
+
     function setupCardInteractions() {
         const cards = document.querySelectorAll('.card');
         cards.forEach(card => {
             card.removeEventListener('click', handleCardClick);
-            card.removeEventListener('touchend', handleCardTouch);
+            card.removeEventListener('touchstart', handleCardTouchStart);
+            card.removeEventListener('touchend', handleCardTouchEnd);
             card.addEventListener('click', handleCardClick);
-            card.addEventListener('touchend', handleCardTouch);
+            card.addEventListener('touchstart', handleCardTouchStart, { passive: true });
+            card.addEventListener('touchend', handleCardTouchEnd);
         });
     }
-    
+
+    // Для десктопа: просто по клику
     function handleCardClick(e) {
-        const currentTime = new Date().getTime();
-        const timeSinceLastClick = currentTime - (this.lastClickTime || 0);
-        if (timeSinceLastClick < 300) {
-            e.preventDefault();
-            e.stopPropagation();
-            const cardNumber = parseInt(this.dataset.number);
-            const video = this.querySelector('video');
-            const img = this.querySelector('img');
-            if (video) openVideoModal(video.src, cardNumber);
-            else if (img) openImageModal(img.src, cardNumber);
-            this.lastClickTime = 0;
-        } else {
-            this.lastClickTime = currentTime;
+        if (this.touchHandled) {
+            this.touchHandled = false;
+            return;
         }
+        e.preventDefault();
+        e.stopPropagation();
+        const cardNumber = parseInt(this.dataset.number);
+        const video = this.querySelector('video');
+        const img = this.querySelector('img');
+        if (video) openVideoModal(video.src, cardNumber);
+        else if (img) openImageModal(img.src, cardNumber);
     }
-    
-    function handleCardTouch(e) {
-        if (this.isScrolling) return;
-        const currentTime = new Date().getTime();
-        const timeSinceLastTap = currentTime - (this.lastTapTime || 0);
-        if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-            e.preventDefault();
-            e.stopPropagation();
-            const cardNumber = parseInt(this.dataset.number);
-            const video = this.querySelector('video');
-            const img = this.querySelector('img');
-            if (video) openVideoModal(video.src, cardNumber);
-            else if (img) openImageModal(img.src, cardNumber);
-            this.lastTapTime = 0;
-            this.tapCount = 0;
-        } else {
-            this.lastTapTime = currentTime;
-            this.tapCount = (this.tapCount || 0) + 1;
-            setTimeout(() => { this.tapCount = 0; }, 500);
+
+    // Для мобильных: запоминаем начало касания
+    function handleCardTouchStart(e) {
+        const touch = e.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.touchMoved = false;
+    }
+
+    function handleCardTouchEnd(e) {
+        if (this.touchMoved) {
+            this.touchMoved = false;
+            return;
         }
+        const touchEnd = e.changedTouches[0];
+        const deltaX = Math.abs(touchEnd.clientX - this.touchStartX);
+        const deltaY = Math.abs(touchEnd.clientY - this.touchStartY);
+        if (deltaX > 10 || deltaY > 10) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        const cardNumber = parseInt(this.dataset.number);
+        const video = this.querySelector('video');
+        const img = this.querySelector('img');
+        if (video) openVideoModal(video.src, cardNumber);
+        else if (img) openImageModal(img.src, cardNumber);
+        this.touchHandled = true;
+        setTimeout(() => { this.touchHandled = false; }, 100);
     }
     
     function initializeFilters() {
@@ -445,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentCards = cardsWithPaths;
             totalCardsCount = currentCards.length;
             console.log('✅ Загружено карточек:', totalCardsCount);
-            showFeaturedCards();
+            showFeaturedCards(true);
             updateCardsCounter();
         } catch (error) {
             console.error('Ошибка загрузки карточек:', error);
@@ -517,7 +526,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         setTimeout(() => {
             setupCardInteractions();
-            preventScrollTrigger();
             const cardElements = cardsContainer.querySelectorAll('.card');
             cardElements.forEach((card, index) => {
                 setTimeout(() => {
@@ -540,7 +548,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function showFeaturedCards() {
+    function showFeaturedCards(skipAnalytics = false) {
+        console.log('showFeaturedCards вызвана, skipAnalytics =', skipAnalytics);
         isFullView = false;
         activeFilters = [];
         updateActiveFilters();
@@ -555,11 +564,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const filterHint = document.getElementById('filterHint');
         if (filterHint) filterHint.textContent = `Показаны избранные карточки (${featuredCards.length} шт.)`;
 
-        if (typeof ym === 'function') {
+        // Отправляем событие только если skipAnalytics = false (то есть клик пользователя)
+        if (!skipAnalytics && typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'show_featured_cards');
             console.log('Отправлено событие: show_featured_cards');
         }
-
     }
     
     function showAllCards() {
@@ -592,20 +601,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showNoCardsMessage() {
         cardsContainer.innerHTML = `<div class="empty-state"><h3>Карточки не найдены</h3><p>Добавьте карточки в папку cards/ и обновите список в коде</p></div>`;
-    }
-    
-    function preventScrollTrigger() {
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            let touchStartY = 0, touchStartX = 0, isScrolling = false;
-            card.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; isScrolling = false; });
-            card.addEventListener('touchmove', e => {
-                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
-                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
-                if (deltaY > 10 || deltaX > 10) isScrolling = true;
-            });
-            card.addEventListener('touchend', function() { setTimeout(() => { this.isScrolling = isScrolling; }, 100); });
-        });
     }
     
     function toggleTheme() {
@@ -684,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     showMoreBtn.addEventListener('click', showAllCards);
-    showLessBtn.addEventListener('click', showFeaturedCards);
+    showLessBtn.addEventListener('click', () => showFeaturedCards());
     
     if (desktopThemeToggle) desktopThemeToggle.addEventListener('change', toggleTheme);
     if (mobileThemeToggle) mobileThemeToggle.addEventListener('change', toggleTheme);
