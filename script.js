@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_open', { card_id: cardNumber });
-            console.log('Отправлено событие: card_open', cardNumber);
+            //console.log('Отправлено событие: card_open', cardNumber);
         }
 
     }
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
-            console.log('Отправлено событие: card_doubleclick', cardNumber);
+            //console.log('Отправлено событие: card_doubleclick', cardNumber);
         }
 
     }
@@ -259,11 +259,11 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         closeButton.addEventListener('click', closeHandler);
         closeButton.addEventListener('touchend', closeHandler);
-        video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
+        // video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
-            console.log('Отправлено событие: card_doubleclick', cardNumber);
+            //console.log('Отправлено событие: card_doubleclick', cardNumber);
         }
 
     }
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'filter_click', { filter_name: filterName });
-            console.log('Отправлено событие: filter_click', filterName); // для отладки
+            //console.log('Отправлено событие: filter_click', filterName); // для отладки
         }
 
     }
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardsWithPaths = sortedCards.map(card => ({ ...card, path: cardsFolder + card.filename }));
             currentCards = cardsWithPaths;
             totalCardsCount = currentCards.length;
-            console.log('✅ Загружено карточек:', totalCardsCount);
+            // console.log('✅ Загружено карточек:', totalCardsCount);
             showFeaturedCards(true);
             updateCardsCounter();
         } catch (error) {
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showFeaturedCards(skipAnalytics = false) {
-        console.log('showFeaturedCards вызвана, skipAnalytics =', skipAnalytics);
+        // console.log('showFeaturedCards вызвана, skipAnalytics =', skipAnalytics);
         isFullView = false;
         activeFilters = [];
         updateActiveFilters();
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Отправляем событие только если skipAnalytics = false (то есть клик пользователя)
         if (!skipAnalytics && typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'show_featured_cards');
-            console.log('Отправлено событие: show_featured_cards');
+            //console.log('Отправлено событие: show_featured_cards');
         }
     }
     
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'show_all_cards');
-            console.log('Отправлено событие: show_all_cards');
+            //console.log('Отправлено событие: show_all_cards');
         }
 
     }
@@ -738,7 +738,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (platform && typeof ym === 'function') {
                 ym(YM_COUNTER_ID, 'reachGoal', 'social_click', { platform: platform });
-                console.log('Отправлено событие: social_click', platform);
+                //console.log('Отправлено событие: social_click', platform);
             }
         });
     });
