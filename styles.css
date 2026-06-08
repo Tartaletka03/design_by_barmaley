@@ -2332,3 +2332,25 @@ body.light-theme .filter-count {
         right: 30px;
     }
 }
+
+/* Иконка Remanga — меняет цвет: чёрная на светлой теме, белая на тёмной */
+.remanga-icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: middle;
+    margin-right: 6px;
+    background-color: currentColor; /* наследует цвет от родителя */
+    mask: url('remanga.svg') no-repeat center / contain;
+    -webkit-mask: url('remanga.svg') no-repeat center / contain;
+}
+
+/* На тёмной теме иконка должна быть белой */
+body:not(.light-theme) .remanga-icon {
+    color: #ffffff;
+}
+
+/* На светлой теме иконка должна быть чёрной */
+body.light-theme .remanga-icon {
+    color: #000000;
+}

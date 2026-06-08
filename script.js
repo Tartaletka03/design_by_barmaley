@@ -122,6 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cardInfo.video_review_url && cardInfo.video_review_url.trim() !== '') {
             html += `<p><strong>🎬 Видео-разбор:</strong> <a href="${escapeHtml(cardInfo.video_review_url)}" target="_blank" rel="noopener noreferrer">Смотреть разбор</a></p>`;
         }
+        if (cardInfo.remanga_url && cardInfo.remanga_url.trim() !== '') {
+            html += `<p><strong><span class="remanga-icon"></span> <a href="${escapeHtml(cardInfo.remanga_url)}" target="_blank" rel="noopener noreferrer">Ссылка на карту на Remanga</a></strong></p>`;
+        }
         if (cardInfo.original_art_url && cardInfo.original_art_url.trim() !== '') {
             let fixedArtUrl = cardInfo.original_art_url;
             if (fixedArtUrl.includes('drive.google.com') && fixedArtUrl.includes('/file/d/')) {
