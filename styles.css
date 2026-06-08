@@ -2551,3 +2551,46 @@ body.light-theme .multi-select-item:hover {
         word-break: break-word;
     }
 }
+
+
+/* Смещение дропдаунов для левого и правого выравнивания */
+.multi-select-dropdown.align-left {
+    left: -25px !important;
+    right: auto !important;
+}
+.multi-select-dropdown.align-right {
+    left: auto !important;
+    right: -25px !important;
+}
+
+/* Для центрированного не меняем */
+.multi-select-dropdown.align-center {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+}
+
+/* === АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ (до 768px) === */
+@media (max-width: 400px) {
+    .filter-group {
+        min-width: 130px;
+    }
+    .multi-select-dropdown {
+        min-width: 180px;
+        width: max-content;
+        max-width: 250px;
+    }
+    .multi-select-dropdown.align-center {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+    .multi-select-dropdown.align-right {
+        left: auto;
+        right: 0;
+    }
+    .multi-select-item {
+        white-space: normal;
+        word-break: break-word;
+    }
+}

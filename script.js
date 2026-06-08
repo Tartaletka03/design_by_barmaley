@@ -128,6 +128,12 @@ document.addEventListener('DOMContentLoaded', function() {
             updateDropdownOptions();
             filterAndDisplayCards();
         };
+        // Добавляем метод для смены выравнивания
+        wrapper.setAlign = (newAlign) => {
+            // Удаляем старые классы выравнивания
+            dropdown.classList.remove('align-left', 'align-center', 'align-right');
+            dropdown.classList.add(`align-${newAlign}`);
+    };
         return wrapper;
     }
     
@@ -222,6 +228,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    function updateDropdownAlignments() {
+        const windowWidth = window.innerWidth;
+        const isNarrow = windowWidth <= 458;
+        
+        if (!window.filterDropdowns) return;
+        
+        const titleDropdown = window.filterDropdowns.title;
+        const charDropdown = window.filterDropdowns.character;
+        
+        if (titleDropdown) {
+            const titleDropdownElem = titleDropdown.querySelector('.multi-select-dropdown');
+            if (titleDropdownElem) {
+                if (isNarrow) {
+                    // на узком экране – прижимаем вправо
+                    titleDropdownElem.classList.remove('align-center');
+                    titleDropdownElem.classList.add('align-right');
+                } else {
+                    // обратно в центр
+                    titleDropdownElem.classList.remove('align-right');
+                    titleDropdownElem.classList.add('align-center');
+                }
+            }
+        }
+        
+        if (charDropdown) {
+            const charDropdownElem = charDropdown.querySelector('.multi-select-dropdown');
+            if (charDropdownElem) {
+                if (isNarrow) {
+                    // на узком экране – центрируем
+                    charDropdownElem.classList.remove('align-right');
+                    charDropdownElem.classList.add('align-center');
+                } else {
+                    // обратно направо
+                    charDropdownElem.classList.remove('align-center');
+                    charDropdownElem.classList.add('align-right');
+                }
+            }
+        }
+    }
     
     function initializeFilters() {
         function sortByCount(items, config) {
@@ -286,6 +332,52 @@ document.addEventListener('DOMContentLoaded', function() {
             title: titleDropdown,
             character: charDropdown
         };
+
+        window.filterDropdowns = {
+            rank: rankDropdown,
+            title: titleDropdown,
+            character: charDropdown
+        };
+
+        // Функция для обновления align в зависимости от ширины экрана
+        function updateAlignForMobile() {
+            const width = window.innerWidth;
+            
+            if (width <= 320) {
+                // Все три фильтра — по центру
+                rankDropdown.setAlign('center');
+                titleDropdown.setAlign('center');
+                charDropdown.setAlign('center');
+            }
+            else if (width <= 458) {
+                // Rank — по левому краю (как обычно)
+                rankDropdown.setAlign('left');
+                // Тайтл — по правому краю
+                titleDropdown.setAlign('right');
+                // Персонаж — по центру
+                charDropdown.setAlign('center');
+            }
+            else {
+                // Стандартные значения (ширина > 458)
+                rankDropdown.setAlign('left');
+                titleDropdown.setAlign('center');
+                charDropdown.setAlign('right');
+            }
+        }
+        
+        // Вызываем при загрузке
+        updateAlignForMobile();
+        
+        // Слушатель изменения размера с debounce для производительности
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateAlignForMobile();
+            }, 100);
+        });
+
+        updateDropdownAlignments();
     }
     
     // ------------------- ОСТАЛЬНЫЕ ФУНКЦИИ -------------------
@@ -877,6 +969,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ИНИЦИАЛИЗАЦИЯ
     initializeFilters();
+    window.addEventListener('resize', () => {
+        updateDropdownAlignments();
+        // при необходимости также можно обновить позиции открытых дропдаунов, но не обязательно
+    });
     loadTheme();
     loadCardsFromManualList();
     showFirstVisitTooltip();
