@@ -2354,3 +2354,200 @@ body:not(.light-theme) .remanga-icon {
 body.light-theme .remanga-icon {
     color: #000000;
 }
+
+
+/* ========== ВЫПАДАЮЩИЕ ФИЛЬТРЫ ========== */
+.filters-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible !important;
+}
+
+.filter-group {
+    position: relative;
+    min-width: 160px;
+    background: rgba(26, 26, 36, 0.5);
+    border-radius: 16px;
+    padding: 10px 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(138, 43, 226, 0.2);
+    overflow: visible !important;
+    z-index: 1;
+}
+
+.filter-group-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.multi-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.multi-select-btn {
+    width: 100%;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    color: var(--text);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.multi-select-btn:hover {
+    background: rgba(138, 43, 226, 0.2);
+}
+
+/* Выпадающий список – общие стили */
+.multi-select-dropdown {
+    position: absolute;
+    top: 100%;
+    min-width: 160px;
+    max-width: 550px;
+    width: max-content;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #1e1e2e;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 12px;
+    z-index: 100000;
+    display: none;
+    margin-top: 4px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.multi-select-dropdown.open {
+    display: block;
+}
+
+.multi-select-items {
+    padding: 8px;
+}
+
+.multi-select-item {
+    white-space: normal;
+    word-break: break-word;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+.multi-select-item:hover {
+    background: rgba(138, 43, 226, 0.2);
+}
+
+.multi-select-item input {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Варианты выравнивания */
+.multi-select-dropdown.align-left {
+    left: 0;
+    right: auto;
+    transform: none;
+}
+.multi-select-dropdown.align-center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+}
+.multi-select-dropdown.align-right {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+
+
+/* Кнопка AND/OR */
+.logic-switch-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.logic-switch-btn {
+    padding: 8px 16px;
+    background: rgba(26, 26, 36, 0.7);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    color: var(--text);
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.logic-switch-btn.and-mode {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 10px var(--glow);
+}
+
+.logic-switch-btn.or-mode {
+    background: rgba(26, 26, 36, 0.7);
+}
+
+.logic-switch-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Светлая тема */
+body.light-theme .filter-group {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+body.light-theme .multi-select-btn {
+    background: rgba(0, 0, 0, 0.05);
+}
+body.light-theme .multi-select-dropdown {
+    background: #ffffff;
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+body.light-theme .multi-select-item:hover {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+/* === АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ (до 768px) === */
+@media (max-width: 768px) {
+    .filter-group {
+        min-width: 130px;
+    }
+    .multi-select-dropdown {
+        min-width: 180px;
+        width: max-content;
+        max-width: 350px;
+    }
+    .multi-select-dropdown.align-center {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+    .multi-select-dropdown.align-right {
+        left: auto;
+        right: 0;
+    }
+    .multi-select-item {
+        white-space: normal;
+        word-break: break-word;
+    }
+}

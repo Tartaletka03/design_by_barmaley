@@ -21,13 +21,274 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileContactLink = document.getElementById('mobileContactLink');
     
     let currentCards = [];
-    let activeFilters = [];
     let sortDirection = 'desc';
     let isFullView = false;
     let totalCardsCount = 0;
+    let filterMode = 'and'; // 'and' или 'or'
 
-    const YM_COUNTER_ID = 109559184; //  ID СЧЁТЧИКА
+    const YM_COUNTER_ID = 109559184;
 
+    // ------------------- НОВЫЕ ФУНКЦИИ ДЛЯ ВЫПАДАЮЩИХ ФИЛЬТРОВ -------------------
+    function createMultiSelectDropdown(category, items, align = 'left') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'multi-select-wrapper';
+        
+        const btn = document.createElement('button');
+        btn.className = 'multi-select-btn';
+        btn.textContent = 'Выбрать';
+        wrapper.appendChild(btn);
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = `multi-select-dropdown align-${align}`;
+        const itemsContainer = document.createElement('div');
+        itemsContainer.className = 'multi-select-items';
+        
+        const selectedValues = new Set();
+        
+        items.forEach(item => {
+            const label = document.createElement('label');
+            label.className = 'multi-select-item';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = item;
+            checkbox.addEventListener('change', (e) => {
+                if (checkbox.checked) selectedValues.add(item);
+                else selectedValues.delete(item);
+                updateSelectedCount();
+                updateDropdownOptions();
+                if (typeof ym === 'function') {
+                    ym(YM_COUNTER_ID, 'reachGoal', 'filter_select', {
+                        filter_category: category,
+                        filter_value: item,
+                        action: checkbox.checked ? 'add' : 'remove'
+                    });
+                }
+                filterAndDisplayCards();
+            });
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(item));
+            itemsContainer.appendChild(label);
+        });
+        dropdown.appendChild(itemsContainer);
+        wrapper.appendChild(dropdown);
+        
+        const countSpan = document.createElement('span');
+        countSpan.className = 'selected-count';
+        btn.appendChild(countSpan);
+        
+        function updateSelectedCount() {
+            const count = selectedValues.size;
+            if (count === 0) btn.textContent = 'Выбрать';
+            else btn.textContent = `Выбрано (${count})`;
+            btn.appendChild(countSpan);
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) dropdown.classList.remove('open');
+        });
+        
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpening = !dropdown.classList.contains('open');
+            
+            // Закрыть все другие дропдауны
+            document.querySelectorAll('.multi-select-dropdown.open').forEach(openDropdown => {
+                if (openDropdown !== dropdown) {
+                    openDropdown.classList.remove('open');
+                    const parentGroup = openDropdown.closest('.filter-group');
+                    if (parentGroup) parentGroup.style.zIndex = '';
+                }
+            });
+            
+            if (isOpening) {
+                dropdown.classList.add('open');
+                const parentGroup = wrapper.closest('.filter-group');
+                if (parentGroup) {
+                    parentGroup.style.zIndex = '100';
+                    document.querySelectorAll('.filter-group').forEach(group => {
+                        if (group !== parentGroup) group.style.zIndex = '1';
+                    });
+                }
+            } else {
+                dropdown.classList.remove('open');
+                const parentGroup = wrapper.closest('.filter-group');
+                if (parentGroup) parentGroup.style.zIndex = '';
+            }
+        });
+        
+        wrapper.getSelected = () => Array.from(selectedValues);
+        wrapper.setSelected = (values) => {
+            selectedValues.clear();
+            const checkboxes = itemsContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = values.includes(cb.value);
+                if (cb.checked) selectedValues.add(cb.value);
+            });
+            updateSelectedCount();
+            updateDropdownOptions();
+            filterAndDisplayCards();
+        };
+        return wrapper;
+    }
+    
+    
+    function updateDropdownOptions() {
+        if (!window.filterDropdowns) return;
+        const currentSelections = {
+            rank: window.filterDropdowns.rank.getSelected(),
+            title: window.filterDropdowns.title.getSelected(),
+            character: window.filterDropdowns.character.getSelected()
+        };
+        
+        function getCardNumbersForValue(category, value) {
+            if (category === 'rank') return RANKS_CONFIG[value] || [];
+            if (category === 'title') return TITLES_CONFIG[value] || [];
+            if (category === 'character') return CHARACTERS_CONFIG[value] || [];
+            return [];
+        }
+        
+        let relevantCardNumbers;
+        if (filterMode === 'and') {
+            relevantCardNumbers = new Set(currentCards.map(c => c.number));
+            for (let cat in currentSelections) {
+                const selected = currentSelections[cat];
+                if (selected.length === 0) continue;
+                const catNumbers = new Set();
+                for (let val of selected) {
+                    const nums = getCardNumbersForValue(cat, val);
+                    nums.forEach(n => catNumbers.add(n));
+                }
+                relevantCardNumbers = new Set([...relevantCardNumbers].filter(n => catNumbers.has(n)));
+            }
+        } else {
+            relevantCardNumbers = new Set(currentCards.map(c => c.number));
+        }
+        
+        function computeAvailableItems(allItems, getNumbersFunc) {
+            const available = [];
+            for (let val of allItems) {
+                const nums = getNumbersFunc(val);
+                const hasIntersection = [...nums].some(n => relevantCardNumbers.has(n));
+                if (hasIntersection) available.push(val);
+            }
+            available.sort((a, b) => getNumbersFunc(b).length - getNumbersFunc(a).length);
+            return available;
+        }
+        
+        const rankItemsAll = Object.keys(RANKS_CONFIG);
+        const titleItemsAll = Object.keys(TITLES_CONFIG);
+        const charItemsAll = Object.keys(CHARACTERS_CONFIG);
+        
+        const availableRanks = computeAvailableItems(rankItemsAll, (val) => RANKS_CONFIG[val] || []);
+        const availableTitles = computeAvailableItems(titleItemsAll, (val) => TITLES_CONFIG[val] || []);
+        const availableChars = computeAvailableItems(charItemsAll, (val) => CHARACTERS_CONFIG[val] || []);
+        
+        updateDropdownItems(window.filterDropdowns.rank, rankItemsAll, availableRanks);
+        updateDropdownItems(window.filterDropdowns.title, titleItemsAll, availableTitles);
+        updateDropdownItems(window.filterDropdowns.character, charItemsAll, availableChars);
+    }
+    
+    function updateDropdownItems(dropdownWrapper, allItems, availableItems) {
+        const itemsContainer = dropdownWrapper.querySelector('.multi-select-items');
+        const checkboxes = itemsContainer.querySelectorAll('input[type="checkbox"]');
+        // Сортировка видимых элементов по порядку availableItems
+        const orderMap = new Map(availableItems.map((item, idx) => [item, idx]));
+        const sortedCheckboxes = Array.from(checkboxes).sort((a, b) => {
+            const idxA = orderMap.get(a.value) ?? Infinity;
+            const idxB = orderMap.get(b.value) ?? Infinity;
+            return idxA - idxB;
+        });
+        // Переставляем в DOM
+        for (let cb of sortedCheckboxes) {
+            itemsContainer.appendChild(cb.parentElement);
+        }
+        // Обновляем видимость и состояние
+        checkboxes.forEach(cb => {
+            const item = cb.value;
+            const isAvailable = availableItems.includes(item);
+            const label = cb.parentElement;
+            if (isAvailable) {
+                label.style.display = '';
+                cb.disabled = false;
+            } else {
+                label.style.display = 'none';
+                cb.disabled = true;
+                if (cb.checked) {
+                    cb.checked = false;
+                    const selected = dropdownWrapper.getSelected();
+                    const newSelected = selected.filter(v => v !== item);
+                    dropdownWrapper.setSelected(newSelected);
+                }
+            }
+        });
+    }
+    
+    function initializeFilters() {
+        function sortByCount(items, config) {
+            return items.sort((a, b) => config[b].length - config[a].length);
+        }
+        
+        const rankItems = sortByCount(Object.keys(RANKS_CONFIG), RANKS_CONFIG);
+        const titleItems = sortByCount(Object.keys(TITLES_CONFIG), TITLES_CONFIG);
+        const charItems = sortByCount(Object.keys(CHARACTERS_CONFIG), CHARACTERS_CONFIG);
+        
+        const rankContainer = document.createElement('div');
+        rankContainer.className = 'filter-group';
+        rankContainer.innerHTML = '<div class="filter-group-label">Rank</div>';
+        const rankDropdown = createMultiSelectDropdown('rank', rankItems, 'left');
+        rankContainer.appendChild(rankDropdown);
+        
+        const titleContainer = document.createElement('div');
+        titleContainer.className = 'filter-group';
+        titleContainer.innerHTML = '<div class="filter-group-label">Тайтл / Вселенная</div>';
+        const titleDropdown = createMultiSelectDropdown('title', titleItems, 'center');
+        titleContainer.appendChild(titleDropdown);
+        
+        const charContainer = document.createElement('div');
+        charContainer.className = 'filter-group';
+        charContainer.innerHTML = '<div class="filter-group-label">Персонаж</div>';
+        const charDropdown = createMultiSelectDropdown('character', charItems, 'right');
+        charContainer.appendChild(charDropdown);
+        
+        // Кнопка переключения AND/OR
+        const logicContainer = document.createElement('div');
+        logicContainer.className = 'logic-switch-container';
+        const logicBtn = document.createElement('button');
+        logicBtn.className = 'logic-switch-btn and-mode';
+        logicBtn.textContent = 'Режим: И (все теги)';
+        logicBtn.addEventListener('click', () => {
+            filterMode = filterMode === 'and' ? 'or' : 'and';
+            if (filterMode === 'and') {
+                logicBtn.textContent = 'Режим: И (все теги)';
+                logicBtn.classList.remove('or-mode');
+                logicBtn.classList.add('and-mode');
+            } else {
+                logicBtn.textContent = 'Режим: ИЛИ (любой тег)';
+                logicBtn.classList.remove('and-mode');
+                logicBtn.classList.add('or-mode');
+            }
+            if (typeof ym === 'function') {
+                ym(YM_COUNTER_ID, 'reachGoal', 'filter_mode_switch', { mode: filterMode });
+            }
+            updateDropdownOptions();
+            filterAndDisplayCards();
+        });
+        logicContainer.appendChild(logicBtn);
+        
+        filtersContainer.innerHTML = '';
+        filtersContainer.appendChild(rankContainer);
+        filtersContainer.appendChild(titleContainer);
+        filtersContainer.appendChild(charContainer);
+        filtersContainer.appendChild(logicContainer);
+        
+        window.filterDropdowns = {
+            rank: rankDropdown,
+            title: titleDropdown,
+            character: charDropdown
+        };
+    }
+    
+    // ------------------- ОСТАЛЬНЫЕ ФУНКЦИИ -------------------
     function openCardFromHash() {
         const hash = window.location.hash;
         if (hash && hash.startsWith('#card')) {
@@ -149,9 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_open', { card_id: cardNumber });
-            //console.log('Отправлено событие: card_open', cardNumber);
         }
-
     }
     
     function closeDetailsModal() {
@@ -216,9 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
-            //console.log('Отправлено событие: card_doubleclick', cardNumber);
         }
-
     }
     
     function openVideoModal(videoSrc, cardNumber) {
@@ -262,13 +519,10 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         closeButton.addEventListener('click', closeHandler);
         closeButton.addEventListener('touchend', closeHandler);
-        // video.play().catch(e => console.log('Автовоспроизведение заблокировано'));
 
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'card_doubleclick', { card_id: cardNumber });
-            //console.log('Отправлено событие: card_doubleclick', cardNumber);
         }
-
     }
     
     function closeImageModal() {
@@ -293,7 +547,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Для десктопа: просто по клику
     function handleCardClick(e) {
         if (this.touchHandled) {
             this.touchHandled = false;
@@ -308,7 +561,6 @@ document.addEventListener('DOMContentLoaded', function() {
         else if (img) openImageModal(img.src, cardNumber);
     }
 
-    // Для мобильных: запоминаем начало касания
     function handleCardTouchStart(e) {
         const touch = e.touches[0];
         this.touchStartX = touch.clientX;
@@ -338,117 +590,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => { this.touchHandled = false; }, 100);
     }
     
-    function initializeFilters() {
-        const allButton = document.createElement('button');
-        allButton.className = 'filter-btn active';
-        allButton.textContent = 'Все';
-        allButton.setAttribute('data-filter-name', 'Все');
-        allButton.addEventListener('click', () => {
-            activeFilters = [];
-            updateActiveFilters();
-            filterAndDisplayCards();
-            if (isFullView) updateFilterCounts();
-        });
-        filtersContainer.appendChild(allButton);
-        
-        Object.keys(FILTERS_CONFIG).forEach(filterName => {
-            const button = document.createElement('button');
-            button.className = 'filter-btn';
-            button.textContent = filterName;
-            button.setAttribute('data-filter-name', filterName);
-            button.addEventListener('click', () => toggleFilter(filterName));
-            filtersContainer.appendChild(button);
-        });
-        if (isFullView) updateFilterCounts();
-    }
-
-    function forceUpdateFilterButtons() {
-        const buttons = filtersContainer.querySelectorAll('.filter-btn');
-        for (let button of buttons) {
-            const filterName = button.getAttribute('data-filter-name');
-            if (filterName === 'Все') {
-                if (activeFilters.length === 0) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            } else {
-                if (activeFilters.includes(filterName)) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            }
-        }
-    }
-    
-    function toggleFilter(filterName) {
-        const index = activeFilters.indexOf(filterName);
-        if (index === -1) activeFilters.push(filterName);
-        else activeFilters.splice(index, 1);
-        
-        // МГНОВЕННО обновляем внешний вид кнопок (без ожидания перерисовки карточек)
-        forceUpdateFilterButtons();
-        
-        // Принудительный reflow — заставляет браузер немедленно применить стили
-        void document.body.offsetHeight;
-        
-        // Теперь фильтруем карточки (это может занять время, но кнопки уже подсветились)
-        filterAndDisplayCards();
-        
-        updateFilterHint();
-        if (isFullView) updateFilterCounts();
-
-        if (typeof ym === 'function') {
-            ym(YM_COUNTER_ID, 'reachGoal', 'filter_click', { filter_name: filterName });
-            //console.log('Отправлено событие: filter_click', filterName); // для отладки
-        }
-
-    }
-    
-    function updateActiveFilters() {
-        const buttons = filtersContainer.querySelectorAll('.filter-btn');
-        buttons.forEach(button => {
-            const filterName = button.getAttribute('data-filter-name');
-            if (filterName === 'Все') {
-                button.classList.toggle('active', activeFilters.length === 0);
-            } else {
-                button.classList.toggle('active', activeFilters.includes(filterName));
-            }
-        });
-    }
-    
-    function updateFilterCounts() {
-        if (!isFullView) return;
-        const allButton = Array.from(filtersContainer.querySelectorAll('.filter-btn')).find(btn => btn.getAttribute('data-filter-name') === 'Все');
-        const totalAllCards = currentCards.length;
-        if (allButton) {
-            if (activeFilters.length === 0) {
-                allButton.innerHTML = `Все`;
-                allButton.removeAttribute('data-count');
-            } else {
-                allButton.innerHTML = `Все <span class="filter-count">${totalAllCards}</span>`;
-                allButton.setAttribute('data-count', totalAllCards);
-            }
-        }
-        const filterButtons = Array.from(filtersContainer.querySelectorAll('.filter-btn')).filter(btn => btn.getAttribute('data-filter-name') !== 'Все');
-        filterButtons.forEach(btn => {
-            const filterName = btn.getAttribute('data-filter-name');
-            const filterNumbers = FILTERS_CONFIG[filterName] || [];
-            let count;
-            if (activeFilters.length === 0) {
-                count = filterNumbers.filter(num => currentCards.some(c => c.number === num)).length;
-            } else {
-                const testFilters = [...activeFilters, filterName];
-                count = currentCards.filter(card => {
-                    return testFilters.every(f => FILTERS_CONFIG[f] && FILTERS_CONFIG[f].includes(card.number));
-                }).length;
-            }
-            btn.innerHTML = `${filterName} <span class="filter-count">${count}</span>`;
-            btn.setAttribute('data-count', count);
-        });
-    }
-    
     function loadCardsFromManualList() {
         try {
             const cardsFolder = './cards/';
@@ -456,7 +597,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardsWithPaths = sortedCards.map(card => ({ ...card, path: cardsFolder + card.filename }));
             currentCards = cardsWithPaths;
             totalCardsCount = currentCards.length;
-            // console.log('✅ Загружено карточек:', totalCardsCount);
             showFeaturedCards(true);
             updateCardsCounter();
         } catch (error) {
@@ -471,31 +611,52 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isFullView) {
             filteredCards = filteredCards.filter(card => FEATURED_CARDS.includes(card.number));
             totalCardsToShow = FEATURED_CARDS.length;
-        }
-        if (isFullView && activeFilters.length > 0) {
-            filteredCards = filteredCards.filter(card => {
-                return activeFilters.every(filterName => 
-                    FILTERS_CONFIG[filterName] && FILTERS_CONFIG[filterName].includes(card.number)
-                );
-            });
+        } else {
+            const selectedRanks = window.filterDropdowns?.rank.getSelected() || [];
+            const selectedTitles = window.filterDropdowns?.title.getSelected() || [];
+            const selectedChars = window.filterDropdowns?.character.getSelected() || [];
+            const allSelected = [...selectedRanks, ...selectedTitles, ...selectedChars];
+            if (allSelected.length > 0) {
+                if (filterMode === 'and') {
+                    filteredCards = filteredCards.filter(card => {
+                        return allSelected.every(filterName => {
+                            if (RANKS_CONFIG[filterName]) return RANKS_CONFIG[filterName].includes(card.number);
+                            if (TITLES_CONFIG[filterName]) return TITLES_CONFIG[filterName].includes(card.number);
+                            if (CHARACTERS_CONFIG[filterName]) return CHARACTERS_CONFIG[filterName].includes(card.number);
+                            return false;
+                        });
+                    });
+                } else {
+                    filteredCards = filteredCards.filter(card => {
+                        return allSelected.some(filterName => {
+                            if (RANKS_CONFIG[filterName]) return RANKS_CONFIG[filterName].includes(card.number);
+                            if (TITLES_CONFIG[filterName]) return TITLES_CONFIG[filterName].includes(card.number);
+                            if (CHARACTERS_CONFIG[filterName]) return CHARACTERS_CONFIG[filterName].includes(card.number);
+                            return false;
+                        });
+                    });
+                }
+            }
         }
         if (sortDirection === 'desc') filteredCards.sort((a, b) => b.number - a.number);
         else filteredCards.sort((a, b) => a.number - b.number);
         displayCards(filteredCards);
         updateCardsCounter(filteredCards.length, totalCardsToShow);
-        if (isFullView) {
-            updateFilterHint();
-            updateFilterCounts();
-        }
+        if (isFullView) updateFilterHint();
     }
     
-    function displayCards(cards) {
+    function displayCards(cards, keepOrder = false) {
         if (cards.length === 0) {
             cardsContainer.innerHTML = `<div class="empty-state"><h3>Карточки не найдены</h3><p>${isFullView ? 'Нет карточек, соответствующих выбранным фильтрам.' : 'Избранные карточки не найдены.'}</p></div>`;
             return;
         }
+        let cardsToDisplay = cards;
+        if (!keepOrder) {
+            if (sortDirection === 'desc') cardsToDisplay = [...cards].sort((a, b) => b.number - a.number);
+            else cardsToDisplay = [...cards].sort((a, b) => a.number - b.number);
+        }
         cardsContainer.innerHTML = '';
-        cards.forEach(card => {
+        cardsToDisplay.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
             cardElement.dataset.number = card.number;
@@ -552,12 +713,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showFeaturedCards(skipAnalytics = false) {
-        // console.log('showFeaturedCards вызвана, skipAnalytics =', skipAnalytics);
         isFullView = false;
-        activeFilters = [];
-        updateActiveFilters();
-        const featuredCards = FEATURED_CARDS.map(num => currentCards.find(card => card.number === num)).filter(card => card);
-        displayCards(featuredCards);
+        if (window.filterDropdowns) {
+            window.filterDropdowns.rank.setSelected([]);
+            window.filterDropdowns.title.setSelected([]);
+            window.filterDropdowns.character.setSelected([]);
+        }
+        const featuredCards = FEATURED_CARDS
+            .map(num => currentCards.find(card => card.number === num))
+            .filter(card => card);
+        displayCards(featuredCards, true);
         controlsContainer.style.display = 'none';
         filtersSection.classList.remove('show');
         showMoreBtn.style.display = 'block';
@@ -566,11 +731,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCardsCounter(featuredCards.length, FEATURED_CARDS.length);
         const filterHint = document.getElementById('filterHint');
         if (filterHint) filterHint.textContent = `Показаны избранные карточки (${featuredCards.length} шт.)`;
-
-        // Отправляем событие только если skipAnalytics = false (то есть клик пользователя)
         if (!skipAnalytics && typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'show_featured_cards');
-            //console.log('Отправлено событие: show_featured_cards');
         }
     }
     
@@ -582,24 +744,24 @@ document.addEventListener('DOMContentLoaded', function() {
         showMoreBtn.style.display = 'none';
         showLessBtn.style.display = 'block';
         filterAndDisplayCards();
-        updateFilterCounts();
-
         if (typeof ym === 'function') {
             ym(YM_COUNTER_ID, 'reachGoal', 'show_all_cards');
-            //console.log('Отправлено событие: show_all_cards');
         }
-
     }
     
     function updateFilterHint() {
         const filterHint = document.getElementById('filterHint');
         if (!filterHint) return;
-        if (activeFilters.length === 0) {
+        const selectedRanks = window.filterDropdowns?.rank.getSelected() || [];
+        const selectedTitles = window.filterDropdowns?.title.getSelected() || [];
+        const selectedChars = window.filterDropdowns?.character.getSelected() || [];
+        const allSelected = [...selectedRanks, ...selectedTitles, ...selectedChars];
+        if (allSelected.length === 0) {
             filterHint.textContent = 'Показаны все карточки';
-            return;
+        } else {
+            const modeText = filterMode === 'and' ? 'ВСЕ теги' : 'ЛЮБОЙ из тегов';
+            filterHint.textContent = `Показаны карточки, содержащие ${modeText}: ${allSelected.join(', ')}`;
         }
-        const filterNames = activeFilters.join(', ');
-        filterHint.textContent = `Показаны карточки, содержащие ВСЕ теги: ${filterNames}`;
     }
     
     function showNoCardsMessage() {
@@ -672,6 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
     
+    // ------------------- ОБРАБОТЧИКИ СОБЫТИЙ -------------------
     sortAscBtn.addEventListener('click', () => { sortDirection = 'asc'; sortAscBtn.classList.add('active'); sortDescBtn.classList.remove('active'); filterAndDisplayCards(); });
     sortDescBtn.addEventListener('click', () => { sortDirection = 'desc'; sortDescBtn.classList.add('active'); sortAscBtn.classList.remove('active'); filterAndDisplayCards(); });
     
@@ -712,6 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (detailsCloseBtn) detailsCloseBtn.addEventListener('click', closeDetailsModal);
     if (backToMainBtn) backToMainBtn.addEventListener('click', closeBothModalsAndReturnToGallery);
     
+    // ИНИЦИАЛИЗАЦИЯ
     initializeFilters();
     loadTheme();
     loadCardsFromManualList();
@@ -728,8 +892,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const observer = new MutationObserver(() => updateHtmlAndScrollbar());
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-
-    // Отслеживание кликов по ссылкам на контакты
     document.querySelectorAll('.contact-link-with-text, .mobile-contact-link').forEach(link => {
         link.addEventListener('click', function(e) {
             let platform = '';
@@ -741,9 +903,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (platform && typeof ym === 'function') {
                 ym(YM_COUNTER_ID, 'reachGoal', 'social_click', { platform: platform });
-                //console.log('Отправлено событие: social_click', platform);
             }
         });
     });
-
 });
