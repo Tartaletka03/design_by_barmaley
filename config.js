@@ -2,7 +2,7 @@
 
 // Ранги (без изменений)
 const RANKS_CONFIG = {
-    "Rank: A": [1, 2, 3, 5, 8, 17, 18, 19, 20, 21, 22, 23, 24, 31, 32, 33, 34, 35, 36, 38, 41, 42, 64, 65, 66, 80, 81, 85],
+    "Rank: A": [1, 2, 3, 5, 8, 17, 18, 19, 20, 21, 22, 23, 24, 31, 32, 33, 34, 35, 36, 38, 41, 42, 64, 65, 66, 80, 81, 85, 86],
     "Rank: RE": [4, 6, 7, 9, 10, 11, 12, 13, 14, 16, 15, 25, 26, 27, 28, 29, 30, 37, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 67, 68, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 82, 83, 84]
 };
 
@@ -71,7 +71,7 @@ const CARD_TAGS = {
     61: { title: "Магическая битва", character: "Махито" },
     62: { title: "Магическая битва", character: "Мэй Мэй" },
     63: { title: "Магическая битва", character: "Сукуна" },
-    64: { title: "Blue Lock", character: "Саэ Итоши" },
+    64: { title: "Blue Lock", character: "Сае Итоши" },
     65: { title: "Противостояние святого", character: "Ван Линь" },
     66: { title: "Охотник-самоубийца SSS-ранга", character: "Со Бэк Хян" },
     67: { title: "Fate", character: "Бааван Ши" },
@@ -91,7 +91,8 @@ const CARD_TAGS = {
     82: { title: "Bloodborne", character: "Охотник" },
     83: { title: "Bloodborne", character: "Охотник" },
     84: { title: "The Witcher", character: "Цири" },
-    85: { title: "Для меня игра - убийство", character: "Красная Шапочка" }
+    85: { title: "Для меня игра - убийство", character: "Красная Шапочка" },
+    86: { title: "Blue Lock", character: "Рео Микаге" }
 };
 
 // Генерация TITLES_CONFIG и CHARACTERS_CONFIG с поддержкой массивов
@@ -129,7 +130,7 @@ for (const [numStr, tags] of Object.entries(CARD_TAGS)) {
 const FEATURED_CARDS = [83, 81, 79, 78, 68, 67, 66, 65, 64, 63, 62, 59, 42, 41, 35, 34, 33, 30];
 
 // ========== НАСТРОЙКИ ГЕНЕРАЦИИ СПИСКА КАРТ ==========
-const MAX_CARD_NUMBER = 85;
+const MAX_CARD_NUMBER = 86;
 const EXCLUDED_NUMBERS = [58, 75];
 const VIDEO_NUMBERS = [];
 
